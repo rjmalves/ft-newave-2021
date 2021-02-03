@@ -1,4 +1,4 @@
-# FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.4.2
+# FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.02
 # FEVEREIRO / 2021
 
 # TESTE 01
@@ -29,7 +29,7 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.pmo import LeituraPMO, PMO
+from inewave.newave.pmo import LeituraPMO
 from inewave.newave.parp import LeituraPARp
 from inewave.nwlistop.mediassin import LeituraMediasSIN
 from inewave.nwlistop.mediasmerc import LeituraMediasMerc
