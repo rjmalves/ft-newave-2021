@@ -36,8 +36,8 @@ from inewave.nwlistop.mediasmerc import LeituraMediasMerc
 
 
 # Variáveis auxiliares no processo
-diretorio_v270000 = "C:\\Users\\ONS\\git\\inewave\\tests\\_arquivos"
-diretorio_v270402 = "C:\\Users\\ONS\\git\\inewave\\tests\\_arquivos"
+diretorio_v270000 = ""
+diretorio_v270402 = ""
 
 # Lê os arquivos de cada diretório
 pmo_v270000 = LeituraPMO(diretorio_v270000).le_arquivo()
