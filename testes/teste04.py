@@ -42,7 +42,9 @@ pmo = LeituraPMO(diretorio_exec).le_arquivo()
 
 # Compara os dados lidos
 eco_igual = dger.eq_eco_saida(pmo.dados_gerais)
+flags_dger = dger.afluencia_anual_parp
+flags_pmo = pmo.dados_gerais.afluencia_anual_parp
 
 print(f"Eco de saída igual: {eco_igual}")
-print(f"Flags no dger = {dger.afluencia_anual_parp}")
-print(f"Flags no  pmo = {pmo.dados_gerais.afluencia_anual_parp}")
+print(f"Flags no dger: AFL. ANUAL = {flags_dger[0]} RED ORDEM = {flags_dger[1]}")
+print(f"Flags no  pmo: AFL. ANUAL = {flags_pmo[0]} RED ORDEM = {flags_pmo[1]}")
