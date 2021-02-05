@@ -8,7 +8,6 @@
 # •	AFLUENCIA ANUAL PARP
 # •	REDUCAO DA ORDEM
 
-
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
 #
 # 1- Substituir nas variáveis auxiliares os diretórios onde
