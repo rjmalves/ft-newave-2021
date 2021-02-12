@@ -1,4 +1,4 @@
-# FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.02
+# FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
 # TESTE 07
@@ -18,7 +18,7 @@
 #    python -m venv ./venv
 #
 # 3- Ativar o ambiente virtual com um dos comandos:
-#    LINUX: ./venv/bin/activate
+#    LINUX: source venv/bin/activate
 #    WINDOWS: ./venv/Scripts/activate
 #
 # 4- Instalar os módulos necessários com o comando:
