@@ -45,9 +45,8 @@ class YuleWalkerPAR:
     def _autocorr(self, p: int) -> np.ndarray:
         # Para cada lag até a ordem máxima dentre as ordens
         # fornecidas, calcula as correlaçoes
-        max_ordem = max(self.ordens)
         acf_list: List[float] = []
-        for o in range(max_ordem + 1):
+        for o in range(self.periodos):
             sinal_m = self.sinal[:, p]
             sinal_lag = self.sinal[:, p - o]
             # Se o mês de referência para o cálculo das
@@ -63,10 +62,13 @@ class YuleWalkerPAR:
                                  np.std(sinal_lag,
                                         ddof=self.ddof)))
         acf = np.array(acf_list)
-        print(f"p = {p} acf = {acf}")
         return acf
 
-    def ajusta_modelo(self) -> List[List[float]]:
+    def estima_modelo(self) -> List[List[float]]:
+        """
+        Realiza a estimação dos coeficientes do modelo PAR(p)
+        a partir da resolução do sistema de Yule-Walker.
+        """
         acfs = [self._autocorr(p) for p in range(self.periodos)]
         # Para cada período, obtém os coeficientes
         coefs: List[List[float]] = []
@@ -91,6 +93,36 @@ class YuleWalkerPAR:
             coefs.append(coefs_norm)
         return coefs
 
+    def facp(self,
+             p: int,
+             maxlag: int) -> np.ndarray:
+        """
+        Calcula a função de autocorrelação parcial periódica
+        para um período `p`, considerando um máximo de atrasos `maxlag`.
+        """
+        acfs = [self._autocorr(p) for p in range(self.periodos)]
+        # Monta a matriz YW
+        yw = np.ones((maxlag, maxlag))
+        for i in range(maxlag):
+            for j in range(maxlag):
+                m = 0
+                lag = 0
+                if j < i:
+                    m = (p - j - 1) % self.periodos
+                    lag = i - j
+                elif j > i:
+                    m = (p - i - 1) % self.periodos
+                    lag = j - i
+                yw[i, j] = acfs[m][lag]
+        # Obtém os coeficientes
+        autocors = acfs[p][1:maxlag+1].T
+        acps: List[float] = []
+        for o in range(1, maxlag):
+            acp = list(np.matmul(np.linalg.inv(yw[:o, :o]),
+                                 autocors[:o]))[o - 1]
+            acps.append(acp)
+        return np.array(acps)
+
 
 class YuleWalkerPARA:
     """
@@ -104,7 +136,6 @@ class YuleWalkerPARA:
         self.n_amostras, self.periodos = self.sinal.shape
         self.medias = self._medias_per(sinal)
         self.ddof = 0
-        print(self.sinal)
         # Normaliza o sinal por período
         for j in range(self.periodos):
             media = np.mean(self.sinal[:, j])
