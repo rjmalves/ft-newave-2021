@@ -1,17 +1,30 @@
-from parpa.par import PAR
-from parpa.yulewalker import YuleWalkerPAR
+from parpa.yulewalker import YuleWalkerPAR, YuleWalkerPARA
 
-import matplotlib.pyplot as plt
+from inewave.newave.parp import LeituraPARp
 
-# Coefs:  PHI1 ... PHIp
-m = [0.295, 0.378]
-m2 = [0.295, -0.178]
-modelo = PAR([m, m2])
-ordens = [2, 2]
-saida = modelo.simula(1000)
-yw = YuleWalkerPAR(saida, ordens)
+# Lê os dados no parp.dat
+dir = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_01_oficial_64proc"
+parp = LeituraPARp(dir).le_arquivo()
+entrada = parp.series[1][ :, :, 0][:, 1:]
+ordens = parp.ordens[1][0, 1:]
+yw = YuleWalkerPAR(entrada, ordens)
 coefs = yw.ajusta_modelo()
-print(f"ajuste PAR = {coefs}")
-plt.plot(saida)
-plt.savefig("teste.png")
+print("Yule-Walker Teste | Arquivo parp.dat")
+coefs_parp = parp.coeficientes[1][:12, :, 0]
+for i, m in enumerate(coefs):
+    ordem = len(m)
+    print(["{:1.3f} | {:1.3f}"
+           .format(m[j], coefs_parp[i][j])
+           for j in range(ordem)])
 
+
+# Teste PAR(p)-A
+ywa = YuleWalkerPARA(entrada, ordens)
+coefsa = ywa.ajusta_modelo()
+print("Yule-Walker-A Teste | Arquivo parp.dat")
+coefs_parp = parp.coeficientes[1][:12, :, 0]
+for i, m in enumerate(coefsa):
+    ordem = len(m)
+    print(["{:1.3f} | {:1.3f}"
+           .format(m[j], coefs_parp[i][min([j, 5])])
+           for j in range(ordem)])

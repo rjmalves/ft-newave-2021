@@ -4,7 +4,7 @@ from typing import List
 
 np.random.seed(42)
 
-class PAR(Modelo):
+class PARA(Modelo):
     """
     """
     def __init__(self,
@@ -20,6 +20,7 @@ class PAR(Modelo):
         max_ordem = 0
         for p in range(self.periodos):
             max_ordem = max([max_ordem, len(self.coefs[p])])
+        max_ordem = max([max_ordem, self.periodos])
         # Gera as saídas iniciais
         if valores_iniciais is None:
             saida = [0.0] * max_ordem
@@ -31,8 +32,10 @@ class PAR(Modelo):
             p = a % self.periodos
             # Aplica o modelo do período
             s = 0
-            for i, coef in enumerate(self.coefs[p]):
+            for i, coef in enumerate(self.coefs[p][:-1]):
                 s += coef * saida[-(i+1)]
-            s += 0.01 * np.random.randn()
+            # O último coeficiente é o da média
+            s += self.coefs[p][-1] * np.mean(saida[-self.periodos:])
+            s += np.random.randn()
             saida.append(s)
         return np.array(saida)

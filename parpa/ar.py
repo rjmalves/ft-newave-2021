@@ -14,9 +14,12 @@ class AR(Modelo):
 
     def simula(self,
                amostras: int,
-               valor_inicial: float = 0.0) -> List[float]:
+               valores_iniciais: List[float] = None) -> List[float]:
         # Gera as saídas iniciais
-        saida = [valor_inicial] * len(self.coefs)
+        if valores_iniciais is None:
+            saida = [0.0] * len(self.coefs)
+        else:
+            saida = valores_iniciais
         n_iniciais = len(saida)
         for _ in range(n_iniciais, amostras):
             s = 0
