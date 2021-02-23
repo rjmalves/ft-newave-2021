@@ -1,8 +1,12 @@
 from parpa.yulewalker import YuleWalkerPAR, YuleWalkerPARA
 
 from inewave.newave.parp import LeituraPARp
+import numpy as np
 
-# Lê os dados no parp.dat
+# Fixa o seed para números aleatórios
+np.random.seed(42)
+
+# Teste PAR(p)
 dir = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_01_oficial_64proc"
 parp = LeituraPARp(dir).le_arquivo()
 entrada = parp.series[1][ :, :, 0][:, 1:]

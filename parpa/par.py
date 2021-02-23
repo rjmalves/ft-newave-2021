@@ -2,7 +2,6 @@ from parpa.base.modelo import Modelo
 import numpy as np
 from typing import List
 
-np.random.seed(42)
 
 class PAR(Modelo):
     """
