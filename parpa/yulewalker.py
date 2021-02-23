@@ -6,6 +6,9 @@ from typing import List
 
 class YuleWalkerAR:
     """
+    Conjunto de métodos para cálculos associados com a
+    montagem da matriz de autocorrelações de YW para um
+    modelo AR.
     """
     def __init__(self,
                  sinal: np.ndarray):
@@ -28,11 +31,12 @@ class YuleWalkerAR:
 
 class YuleWalkerPAR:
     """
+    Conjunto de métodos para cálculos associados com a
+    montagem da matriz de autocovariâncias de YW para um
+    modelo PAR(p).
     """
     def __init__(self,
-                 sinal: np.ndarray,
-                 ordens: List[int]):
-        self.ordens = ordens
+                 sinal: np.ndarray):
         self.sinal = deepcopy(sinal)
         self.n_amostras, self.periodos = self.sinal.shape
         # O atributo ddof é usado para indicar se o desvio padrão
@@ -46,23 +50,74 @@ class YuleWalkerPAR:
             self.sinal[:, j] = (self.sinal[:, j] - media) / desvio
 
     def _autocorr(self, p: int, lag: int) -> float:
-        sinal_m = self.sinal[:, p]
-        sinal_lag = self.sinal[:, p - lag]
+        """
+        Calcula a autocorrelação para o sinal normalizado, em
+        um período `p` e com lag `lag`. A autocorrelação é
+        definida em [1] por:
+
+        Gamma(k) = E[(z(t) - E[z(t)]) * (z(t - k) - E[z(t - k)])]
+
+        Rho(k) = Gamma(k) / Gamma(0)
+
+        Para o modelo periódico, convém representar o período de
+        cada amostra. Se o total de períodos é P::
+
+        Gamma(p, k) = E[(z(t, p) - E[z(t, p)]) * z(t - k, K) - E[z(t - k, K)])]
+
+        onde K = (p - k) % P.
+
+        Então a autocorrelação é:
+
+        Rho(p, k) = Gamma(p, k) / Gamma(p, 0)
+
+        **Referências**
+
+        [1] K.W. Hipel A.I McLeod. Time Series Modelling of Water Resources
+        and Environmental Systems, Volume 45, Cap. 14. 1994.
+        """
+        lag_mod = lag % self.periodos
+        sinal_m = deepcopy(self.sinal[:, p])
+        sinal_lag = deepcopy(self.sinal[:, p - lag_mod])
         # Se o mês de referência para o cálculo das
         # autocorrelações, com o lag "volta um ano",
         # então descontamos uma amostra de cada.
-        if p < lag:
-            sinal_m = sinal_m[1:len(sinal_m)]
-            sinal_lag = sinal_lag[:len(sinal_lag)-1]
-        u = np.mean(np.multiply(sinal_m,
-                                sinal_lag))
+        if p < lag_mod:
+            sinal_m = sinal_m[1:]
+            sinal_lag = sinal_lag[:-1]
+        u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_m,
+                                                         sinal_lag))
         ac = (u / (np.std(sinal_m,
                           ddof=self.ddof) *
                    np.std(sinal_lag,
                           ddof=self.ddof)))
         return ac
 
-    def estima_modelo(self) -> List[List[float]]:
+    def _matriz_yw(self,
+                   p: int,
+                   o: int) -> np.ndarray:
+        """
+        Monta a matriz de Yule-Walker para um determinado período
+        `p` e de ordem `o`.
+        """
+        yw = np.ones((o, o))
+        for i in range(o):
+            for j in range(o):
+                if i == j:
+                    continue
+                m = 0
+                lag = 0
+                if j < i:
+                    m = (p - j - 1) % self.periodos
+                    lag = i - j
+                elif j > i:
+                    m = (p - i - 1) % self.periodos
+                    lag = j - i
+                yw[i, j] = self._autocorr(m, lag)
+
+        return yw
+
+    def estima_modelo(self,
+                      ordens: List[float]) -> List[List[float]]:
         """
         Realiza a estimação dos coeficientes do modelo PAR(p)
         a partir da resolução do sistema de Yule-Walker.
@@ -70,20 +125,8 @@ class YuleWalkerPAR:
         # Para cada período, obtém os coeficientes
         coefs: List[List[float]] = []
         for p in range(self.periodos):
-            o = self.ordens[p]
-            # Monta a matriz YW
-            yw = np.ones((o, o))
-            for i in range(o):
-                for j in range(o):
-                    m = 0
-                    lag = 0
-                    if j < i:
-                        m = (p - j - 1) % self.periodos
-                        lag = i - j
-                    elif j > i:
-                        m = (p - i - 1) % self.periodos
-                        lag = j - i
-                    yw[i, j] = self._autocorr(m, lag)
+            o = ordens[p]
+            yw = self._matriz_yw(p, o)
             # Obtém os coeficientes
             autocors = np.array([self._autocorr(p, lag)
                                  for lag in range(1, o + 1)]).T
@@ -99,18 +142,7 @@ class YuleWalkerPAR:
         para um período `p`, considerando um máximo de atrasos `maxlag`.
         """
         # Monta a matriz YW
-        yw = np.ones((maxlag, maxlag))
-        for i in range(maxlag):
-            for j in range(maxlag):
-                m = 0
-                lag = 0
-                if j < i:
-                    m = (p - j - 1) % self.periodos
-                    lag = i - j
-                elif j > i:
-                    m = (p - i - 1) % self.periodos
-                    lag = j - i
-                yw[i, j] = self._autocorr(m, lag)
+        yw = self._matriz_yw(p, maxlag)
         # Obtém os coeficientes
         autocors = np.array([self._autocorr(p, lag)
                              for lag in range(1, maxlag + 1)]).T
@@ -130,7 +162,8 @@ class YuleWalkerPAR:
 class YuleWalkerPARA:
     """
     Conjunto de métodos para cálculos associados com a
-    montagem da matriz de autocovariâncias de YW.
+    montagem da matriz de autocovariâncias de YW para um
+    modelo PAR-A(p).
     """
     def __init__(self,
                  sinal: np.ndarray):
