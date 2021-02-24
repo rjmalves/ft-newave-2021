@@ -14,7 +14,7 @@ class PAR(Modelo):
 
     def simula(self,
                amostras: int,
-               valores_iniciais: List[float] = None) -> List[float]:
+               valores_iniciais: np.ndarray = None) -> List[float]:
         # Determina a maior ordem
         max_ordem = 0
         for p in range(self.periodos):
@@ -32,6 +32,6 @@ class PAR(Modelo):
             s = 0
             for i, coef in enumerate(self.coefs[p]):
                 s += coef * saida[-(i+1)]
-            s += 0.01 * np.random.randn()
+            s += np.random.randn()
             saida.append(s)
         return np.array(saida)

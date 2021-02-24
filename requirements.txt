@@ -1,3 +1,4 @@
 inewave
+numpy
 scipy
 matplotlib
