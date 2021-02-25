@@ -28,6 +28,8 @@
 # 6- Observar a saída exibida no terminal
 
 from inewave.newave.parp import LeituraPARp
+from inewave.config import REES
+from typing import Dict
 from parpa.yulewalker import YuleWalkerPARA
 
 
@@ -37,34 +39,86 @@ diretorio_parpa = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_parpa"
 # Lê o arquivo parp.dat
 parp = LeituraPARp(diretorio_parpa).le_arquivo()
 
-# Realiza a estimação dos coeficientes do modelo
-# para a Configuração 1 do SUDESTE, nas ordens
-# finais dadas pelo NEWAVE.
-entrada = parp.series_energia_ree(1)[1]
-coefs = parp.coeficientes_ree(1)
-ordens = parp.ordens_finais_ree(1)[2020]
-yw = YuleWalkerPARA(entrada)
-coefs_estimados = yw.estima_modelo(ordens)
+# Realiza a verificação de igualdade para todas as
+# configurações de todas as REEs.
 
-# Exibe a comparação dos coeficientes no terminal,
-# com o mesmo número de casas decimais do parp.dat.
-print(" parp.dat | Estimado ")
-print("--------------------")
-for i, m in enumerate(coefs_estimados):
-    ordem = len(m)
-    mes = f"{i + 1}".rjust(2)
-    print(f"   Mês {mes} - Ordem {ordem}")
-    print("--------------------")
-    for j in range(ordem):
-        estimado = "{:1.3f}".format(m[j]).rjust(9)
-        oficial = "{:1.3f}".format(coefs[i][j]).rjust(9)
-        print(f"{oficial} |{estimado} ")
-    print("--------------------")
+# Variáveis auxiliares para armazenar valores
+IDS_REES = range(1, len(REES) + 1)
+# Máxima diferença absoluta por REE
+max_dif_ree: Dict[int, float] = {ree: -1e4
+                                 for ree in IDS_REES}
+periodo_max_dif_ree: Dict[int, int] = {ree: 0
+                                       for ree in IDS_REES}
+ordem_max_dif_ree: Dict[int, int] = {ree: 0
+                                     for ree in IDS_REES}
+coef_o_max_dif_ree: Dict[int, int] = {ree: 0
+                                      for ree in IDS_REES}
+coef_e_max_dif_ree: Dict[int, int] = {ree: 0
+                                      for ree in IDS_REES}
+# Máxima diferença percentual por REE
+max_dif_percent_ree: Dict[int, float] = {ree: -1e4
+                                         for ree in IDS_REES}
+periodo_max_dif_perc_ree: Dict[int, int] = {ree: 0
+                                            for ree in IDS_REES}
+ordem_max_dif_perc_ree: Dict[int, int] = {ree: 0
+                                          for ree in IDS_REES}
+coef_o_max_dif_perc_ree: Dict[int, int] = {ree: 0
+                                           for ree in IDS_REES}
+coef_e_max_dif_perc_ree: Dict[int, int] = {ree: 0
+                                           for ree in IDS_REES}
 
-# # Realiza a verificação de igualdade para todas as
-# # configurações de todas as REEs.
-# entrada = parp.series[1][ :, :, 0][:, 1:]
-# coefs = parp.coeficientes[1][:12, :, 0]
-# ordens = parp.ordens[1][0, 1:]
-# yw = YuleWalkerPARA(entrada)
-# coefs_estimados = yw.estima_modelo(ordens)
+# Faz a estimação para todas as configurações
+for ree in IDS_REES:
+    print(f"Estimando para REE {ree} - {REES[ree - 1]}")
+    series_energia = parp.series_energia_ree(ree)
+    coefs = parp.coeficientes_ree(ree)
+    ordens_finais = parp.ordens_finais_ree(ree)[2020]
+    yw = YuleWalkerPARA(series_energia, [])
+    coefs_estimados = yw.estima_modelo(ordens_finais)
+    for p, coefs_p in enumerate(coefs_estimados):
+        for i, c in enumerate(coefs_p):
+            dif = abs(c - coefs[p][i])
+            dif_percentual = 100 * abs(c - coefs[p][i]) / coefs[p][i]
+            if dif > max_dif_ree[ree]:
+                    max_dif_ree[ree] = dif
+                    max_dif_percent_ree[ree] = dif_percentual
+                    periodo_max_dif_ree[ree] = p + 1
+                    ordem_max_dif_ree[ree] = i + 1
+                    coef_e_max_dif_ree[ree] = c
+                    coef_o_max_dif_ree[ree] = coefs[p][i]
+            if dif_percentual > max_dif_percent_ree[ree]:
+                    max_dif_percent_ree[ree] = dif_percentual
+                    periodo_max_dif_perc_ree[ree] = p + 1
+                    ordem_max_dif_perc_ree[ree] = i + 1
+                    coef_e_max_dif_perc_ree[ree] = c
+                    coef_o_max_dif_perc_ree[ree] = coefs[p][i]
+
+print("")
+print(" REE | MAX. DIF. ABS. | MES | ORDEM |  COEF. OFICIAL | COEF. ESTIMADO")
+print("---------------------------------------------------------------------")
+for ree in IDS_REES:
+    str_ree = f"{ree}".rjust(2)
+    str_max_dif = "{:1.9f}".format(max_dif_ree[ree]).rjust(10)
+    str_mes = f"{periodo_max_dif_ree[ree]}".rjust(2)
+    str_ordem = f"{ordem_max_dif_ree[ree]}"
+    str_coef_o = "{:1.6f}".format(coef_o_max_dif_ree[ree]).rjust(12)
+    str_coef_e = "{:1.6f}".format(coef_e_max_dif_ree[ree]).rjust(12)
+    str_linha = f"  {str_ree} |    {str_max_dif} |  {str_mes} | "
+    str_linha += f"    {str_ordem} |   {str_coef_o} |   {str_coef_e}"
+    print(str_linha)
+print("---------------------------------------------------------------------")
+print("")
+
+print(" REE | MAX. DIF. PERC. | MES | ORDEM |  COEF. OFICIAL | COEF. ESTIMADO")
+print("----------------------------------------------------------------------")
+for ree in IDS_REES:
+    str_ree = f"{ree}".rjust(2)
+    str_max_dif = "{:2.6f}".format(max_dif_percent_ree[ree]).rjust(10)
+    str_mes = f"{periodo_max_dif_perc_ree[ree]}".rjust(2)
+    str_ordem = f"{ordem_max_dif_perc_ree[ree]}"
+    str_coef_o = "{:1.6f}".format(coef_o_max_dif_perc_ree[ree]).rjust(12)
+    str_coef_e = "{:1.6f}".format(coef_e_max_dif_perc_ree[ree]).rjust(12)
+    str_linha = f"  {str_ree} |      {str_max_dif} |  {str_mes} | "
+    str_linha += f"    {str_ordem} |   {str_coef_o} |   {str_coef_e}"
+    print(str_linha)
+print("----------------------------------------------------------------------")

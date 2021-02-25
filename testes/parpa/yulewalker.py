@@ -1,7 +1,7 @@
 import numpy as np
 from copy import deepcopy
 from scipy.linalg import toeplitz
-from typing import List
+from typing import List, Dict
 
 
 class YuleWalkerAR:
@@ -166,27 +166,32 @@ class YuleWalkerPARA:
     modelo PAR-A(p).
     """
     def __init__(self,
-                 sinal: np.ndarray):
+                 series_por_config: Dict[int, np.ndarray],
+                 tabela_configs: np.ndarray):
 
-        self.sinal = deepcopy(sinal)
-        self.n_amostras, self.periodos = self.sinal.shape
-        self.medias = self._medias_per(sinal)
+        self.sinal = deepcopy(series_por_config)
+        self.tabela_configs = tabela_configs
+        self.n_amostras, self.periodos = self.sinal[1].shape
+        self.medias = self._medias_per(self.sinal)
         # O atributo ddof é usado para indicar se o desvio padrão
         # calculado é amostral ou populacional (é a quantia
         # subtraída do denoiminador - 'graus de liberdade')
         self.ddof = 0
         # Normaliza o sinal por período
-        for j in range(self.periodos):
-            media = np.mean(self.sinal[:, j])
-            desvio = np.std(self.sinal[:, j], ddof=self.ddof)
-            self.sinal[:, j] = (self.sinal[:, j] - media) / desvio
+        for c in self.sinal.keys():
+            for j in range(self.periodos):
+                med = np.mean(self.sinal[c][:, j])
+                dsv = np.std(self.sinal[c][:, j], ddof=self.ddof)
+                self.sinal[c][:, j] = (self.sinal[c][:, j] - med) / dsv
         # Normaliza as médias por período
-        for j in range(self.periodos):
-            media = np.mean(self.medias[1:, j])
-            desvio = np.std(self.medias[1:, j], ddof=self.ddof)
-            self.medias[1:, j] = (self.medias[1:, j] - media) / desvio
+        for c in self.medias.keys():
+            for j in range(self.periodos):
+                med = np.mean(self.medias[c][1:, j])
+                dsv = np.std(self.medias[c][1:, j], ddof=self.ddof)
+                self.medias[c][1:, j] = (self.medias[c][1:, j] - med) / dsv
 
-    def _medias_per(self , sinal: np.ndarray):
+    def _medias_per(self ,
+                    sinal: Dict[int, np.ndarray]) -> Dict[int, np.ndarray]:
         """
         Calcula a média dos últimos períodos e retorna a matriz
         de médias.
@@ -197,17 +202,24 @@ class YuleWalkerPARA:
         função de covariância segundo o CEPEL significa um lag
         `0` na função de covariância deste código.
         """
-        # Coloca todos os dados em sequência para facilitar
-        sinal_seq = np.array(sinal.reshape(sinal.size,))
-        medias = np.zeros((self.n_amostras, self.periodos))
-        for i in range(1, self.n_amostras):
-            for j in range(self.periodos):
-                i_sinal = (i - 1) * self.periodos + j
-                f_sinal = i_sinal + self.periodos
-                medias[i, j] = np.mean(sinal_seq[i_sinal:f_sinal])
-        return medias
+        medias_configs: Dict[int, np.ndarray] = {}
+        for c in self.sinal.keys():
+            # Coloca todos os dados em sequência para facilitar
+            sinal_seq = np.array(sinal[c].reshape(sinal[c].size,))
+            medias = np.zeros((self.n_amostras, self.periodos))
+            for i in range(1, self.n_amostras):
+                for j in range(self.periodos):
+                    i_sinal = (i - 1) * self.periodos + j
+                    f_sinal = i_sinal + self.periodos
+                    medias[i, j] = np.mean(sinal_seq[i_sinal:f_sinal])
+            medias_configs[c] = medias
+        return medias_configs
 
-    def _autocov(self, p: int, lag: int) -> float:
+    def _autocov(self,
+                 p: int,
+                 lag: int,
+                 cfg_p: int,
+                 cfg_lag: int) -> float:
         """
         Calcula a autocovariância para o sinal normalizado, em
         um período `p` e com lag `lag`. A autocovariância é
@@ -229,8 +241,8 @@ class YuleWalkerPARA:
 
         """
         lag_mod = lag % self.periodos
-        sinal_m = deepcopy(self.sinal[:, p])
-        sinal_lag = deepcopy(self.sinal[:, p - lag_mod])
+        sinal_m = deepcopy(self.sinal[cfg_p][:, p])
+        sinal_lag = deepcopy(self.sinal[cfg_lag][:, p - lag_mod])
         # Se o mês de referência para o cálculo das
         # autocorrelações, com o lag "volta um ano",
         # então descontamos uma amostra de cada.
@@ -241,7 +253,11 @@ class YuleWalkerPARA:
                                                          sinal_lag))
         return u
 
-    def _cov_media(self, p: int, lag: int) -> float:
+    def _cov_media(self,
+                   p: int,
+                   lag: int,
+                   cfg_p: int,
+                   cfg_lag: int) -> float:
         """
         Realiza o cálculo da covariância entre o sinal defasado no
         tempo com a componente da média anual.
@@ -256,8 +272,8 @@ class YuleWalkerPARA:
         com lag.
         """
         lag_mod = lag % self.periodos
-        sinal_med = deepcopy(self.medias[:, p])
-        sinal_lag = deepcopy(self.sinal[:, p - lag_mod])
+        sinal_med = deepcopy(self.medias[cfg_p][:, p])
+        sinal_lag = deepcopy(self.sinal[cfg_lag][:, p - lag_mod])
         # Se o mês de referência para o cálculo das
         # autocorrelações com o lag "volta um ano",
         # então descontamos uma amostra de cada.
@@ -281,12 +297,12 @@ class YuleWalkerPARA:
             for j in range(i + 1, ORDEM_MATRIZ - 1):
                 m = (p - i) % self.periodos
                 lag = j - i
-                mat[i, j] = self._autocov(m, lag)
+                mat[i, j] = self._autocov(m, lag, 1, 1)
                 mat[j, i] = mat[i, j]
         # Obtém os coeficientes
         # Adiciona os termos da média do período
         for i in range(ORDEM_MATRIZ - 1):
-            mat[ORDEM_MATRIZ - 1, i] = self._cov_media(p, i)
+            mat[ORDEM_MATRIZ - 1, i] = self._cov_media(p, i, 1, 1)
             mat[i, ORDEM_MATRIZ - 1] = mat[ORDEM_MATRIZ - 1, i]
 
         return mat
