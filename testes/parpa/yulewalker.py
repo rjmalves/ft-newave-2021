@@ -462,8 +462,8 @@ class YuleWalkerPARA:
         for o in range(0, maxlag):
             cfg_p = self.periodos + p
             cfg_lag = max([1, cfg_p - o])
-            ccruz.append(self._corr_media(p,
-                                          o,
-                                          cfg_p,
-                                          cfg_lag))
+            ccruz.append(self._cov_media(p,
+                                         o,
+                                         cfg_p,
+                                         cfg_lag))
         return ccruz
