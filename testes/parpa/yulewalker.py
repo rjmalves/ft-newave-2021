@@ -166,12 +166,9 @@ class YuleWalkerPARA:
     modelo PAR-A(p).
     """
     def __init__(self,
-                 series_por_config: Dict[int, np.ndarray],
-                 tabela_configs: np.ndarray):
+                 series_por_config: Dict[int, np.ndarray]):
 
         self.sinal = deepcopy(series_por_config)
-        self.tabela_configs = np.reshape(tabela_configs,
-                                         (tabela_configs.size,))
         self.n_amostras, self.periodos = self.sinal[1].shape
         self.medias = self._medias_per(self.sinal)
         # O atributo ddof é usado para indicar se o desvio padrão
@@ -285,6 +282,39 @@ class YuleWalkerPARA:
                                                          sinal_lag))
         return u
 
+    def _corr_media(self,
+                    p: int,
+                    lag: int,
+                    cfg_p: int,
+                    cfg_lag: int) -> float:
+        """
+        Realiza o cálculo da correlação entre o sinal defasado no
+        tempo com a componente da média anual.
+        
+        OBS: Pela forma como é calculada a matriz de médias anuais,
+        a variável `A(t - 1)`, como no relatório do CEPEL, que da
+        origem ao termo `RHO(m - 1)` está associada a um lag `m`
+        nesta função.
+
+        Segue o mesmo princípio da autocorrelação, porém realizando
+        o produto dos dois sinais em questão ao invés do mesmo sinal
+        com lag.
+        """
+        lag_mod = lag % self.periodos
+        sinal_med = deepcopy(self.medias[cfg_p][:, p])
+        sinal_lag = deepcopy(self.sinal[cfg_lag][:, p - lag_mod])
+        # Se o mês de referência para o cálculo das
+        # autocorrelações com o lag "volta um ano",
+        # então descontamos uma amostra de cada.
+        if p < lag_mod:
+            sinal_med = sinal_med[1:]
+            sinal_lag = sinal_lag[:-1]
+        u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_med,
+                                                         sinal_lag))
+        cc =  u / (np.std(sinal_med, ddof=self.ddof) *
+                   np.std(sinal_lag, ddof=self.ddof))
+        return cc
+
     def _matriz_extendida(self, p: int, lag: int) -> np.ndarray:
         """
         Retorna a matriz extendida que será usada para montar
@@ -299,7 +329,7 @@ class YuleWalkerPARA:
                 m = (p - i) % self.periodos
                 lag = j - i
                 cfg_p = self.periodos + m
-                cfg_lag = cfg_p - lag
+                cfg_lag = max([1, cfg_p - lag])
                 mat[i, j] = self._autocov(m,
                                           lag,
                                           cfg_p,
@@ -309,7 +339,7 @@ class YuleWalkerPARA:
         # Adiciona os termos da média do período
         for i in range(ORDEM_MATRIZ - 1):
             cfg_p = self.periodos + p
-            cfg_lag = cfg_p - i
+            cfg_lag = max([1, cfg_p - i])
             mat[ORDEM_MATRIZ - 1, i] = self._cov_media(p,
                                                        i,
                                                        cfg_p,
@@ -337,12 +367,15 @@ class YuleWalkerPARA:
         return [c[0] for c in coefs_norm]
 
     def estima_modelo(self,
-                      ordens: List[float]) -> List[List[float]]:
+                      ordens: List[float],
+                      configs: np.ndarray) -> List[List[float]]:
         """
         Realiza a estimação do modelo `PAR-A(p1, p2, ..., pm)`
         resolvendo o sistema de equações de Yule-Walker para a
         lista de ordens `[p1, p2, ..., pm]` fornecidas.
         """
+        self.tabela_configs = np.reshape(configs,
+                                         (configs.size,))
         coefs: List[List[float]] = []
         for p in range(self.periodos):
             o = ordens[p]
@@ -351,7 +384,10 @@ class YuleWalkerPARA:
 
         return coefs
 
-    def facp(self, p: int, maxlag: int) -> List[float]:
+    def facp(self,
+             p: int,
+             maxlag: int,
+             configs: np.ndarray) -> List[float]:
         """
         Determina a Função de Autocorrelação Parcial (FACP)
         através do método das correlações condicionadas para
@@ -378,6 +414,8 @@ class YuleWalkerPARA:
 
         A FACP é obtida na entrada [0, 1] ou [1, 0] de COND.
         """
+        self.tabela_configs = np.reshape(configs,
+                                         (configs.size,))
         # Para cada período, obtém os coeficientes
         acps: List[float] = []
         mat = self._matriz_extendida(p, maxlag)
@@ -387,7 +425,6 @@ class YuleWalkerPARA:
             ind22 = [[maxlag + 1] if maxlag == 1 else
                         list(range(1, o)) + [maxlag + 1]][0]
 
-            # Caso de sig22 singular
             if np.array_equal(ind22,
                               np.zeros_like(ind22)):
                 phi = mat[0, o + 1] / (np.sqrt(mat[0, 0] *
@@ -410,3 +447,23 @@ class YuleWalkerPARA:
             acps.append(phi)
 
         return np.array(acps)
+
+    def corr_cruzada_media(self,
+                           p: int,
+                           maxlag: int,
+                           configs: np.ndarray) -> List[float]:
+        """
+        """
+        self.tabela_configs = np.reshape(configs,
+                                         (configs.size,))
+        # Para cada período, obtém os coeficientes
+        ccruz: List[float] = []
+        # Calcula as correlações cruzadas
+        for o in range(0, maxlag):
+            cfg_p = self.periodos + p
+            cfg_lag = max([1, cfg_p - o])
+            ccruz.append(self._corr_media(p,
+                                          o,
+                                          cfg_p,
+                                          cfg_lag))
+        return ccruz

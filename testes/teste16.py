@@ -27,7 +27,6 @@
 #
 # 6- Observar a saída exibida no terminal
 
-from inewave._utils.leitura import Leitura
 from inewave.newave.pmo import LeituraPMO
 from inewave.newave.parp import LeituraPARp
 from inewave.config import REES
@@ -82,6 +81,7 @@ coef_e_max_dif_perc_ree: Dict[int, int] = {ree: 0
 for ree in IDS_REES:
     print(f"Estimando para REE {ree} - {REES[ree - 1]}")
     series_energia = parp.series_energia_ree(ree)
+    yw = YuleWalkerPARA(series_energia)
     coefs = parp.coeficientes_ree(ree)
     for a, ano in enumerate(parp.anos_estudo):
         ordens_finais = parp.ordens_finais_ree(ree)[ano]
@@ -96,8 +96,7 @@ for ree in IDS_REES:
             c_atual = pmo.configuracoes_expansao.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         # Realiza a estimação para o ano
-        yw = YuleWalkerPARA(series_energia, configs)
-        coefs_estimados = yw.estima_modelo(ordens_finais)
+        coefs_estimados = yw.estima_modelo(ordens_finais, configs)
         # Atualiza as variáveis com as máximas diferenças
         for p, coefs_p in enumerate(coefs_estimados):
             for i, c in enumerate(coefs_p):
