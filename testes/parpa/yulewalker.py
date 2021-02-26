@@ -170,7 +170,8 @@ class YuleWalkerPARA:
                  tabela_configs: np.ndarray):
 
         self.sinal = deepcopy(series_por_config)
-        self.tabela_configs = tabela_configs
+        self.tabela_configs = np.reshape(tabela_configs,
+                                         (tabela_configs.size,))
         self.n_amostras, self.periodos = self.sinal[1].shape
         self.medias = self._medias_per(self.sinal)
         # O atributo ddof é usado para indicar se o desvio padrão
@@ -297,19 +298,28 @@ class YuleWalkerPARA:
             for j in range(i + 1, ORDEM_MATRIZ - 1):
                 m = (p - i) % self.periodos
                 lag = j - i
-                mat[i, j] = self._autocov(m, lag, 1, 1)
+                cfg_p = self.periodos + m
+                cfg_lag = cfg_p - lag
+                mat[i, j] = self._autocov(m,
+                                          lag,
+                                          cfg_p,
+                                          cfg_lag)
                 mat[j, i] = mat[i, j]
         # Obtém os coeficientes
         # Adiciona os termos da média do período
         for i in range(ORDEM_MATRIZ - 1):
-            mat[ORDEM_MATRIZ - 1, i] = self._cov_media(p, i, 1, 1)
+            cfg_p = self.periodos + p
+            cfg_lag = cfg_p - i
+            mat[ORDEM_MATRIZ - 1, i] = self._cov_media(p,
+                                                       i,
+                                                       cfg_p,
+                                                       cfg_lag)
             mat[i, ORDEM_MATRIZ - 1] = mat[ORDEM_MATRIZ - 1, i]
 
         return mat
 
     def _resolve_yw(self,
                     mat: np.ndarray,
-                    p: int,
                     lag: int) -> List[float]:
         """
         Monta e resolve o sistema de equações de Yule-Walker
@@ -337,7 +347,7 @@ class YuleWalkerPARA:
         for p in range(self.periodos):
             o = ordens[p]
             mat = self._matriz_extendida(p, o)
-            coefs.append(self._resolve_yw(mat, p, o))
+            coefs.append(self._resolve_yw(mat, o))
 
         return coefs
 
