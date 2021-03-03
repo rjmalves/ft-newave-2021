@@ -83,6 +83,7 @@ for ree in IDS_REES:
     series_energia = parp.series_energia_ree(ree)
     yw = YuleWalkerPARA(series_energia)
     coefs = parp.coeficientes_ree(ree)
+    mes = 0
     for a, ano in enumerate(parp.anos_estudo):
         ordens_finais = parp.ordens_finais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
@@ -100,11 +101,10 @@ for ree in IDS_REES:
         # Atualiza as variáveis com as máximas diferenças
         for p, coefs_p in enumerate(coefs_estimados):
             for i, c in enumerate(coefs_p):
-                dif = abs(c - coefs[p][i])
-                dif_percentual = 100 * abs(c - coefs[p][i]) / coefs[p][i]
+                dif = abs(c - coefs[mes][i])
+                dif_percentual = abs(100 * abs(c - coefs[mes][i]) / coefs[p][i])
                 if dif > max_dif_ree[ree]:
                         max_dif_ree[ree] = dif
-                        max_dif_percent_ree[ree] = dif_percentual
                         ano_max_dif_ree[ree] = ano
                         periodo_max_dif_ree[ree] = p + 1
                         ordem_max_dif_ree[ree] = i + 1
@@ -117,6 +117,7 @@ for ree in IDS_REES:
                         ordem_max_dif_perc_ree[ree] = i + 1
                         coef_e_max_dif_perc_ree[ree] = c
                         coef_o_max_dif_perc_ree[ree] = coefs[p][i]
+            mes += 1
 
 print("")
 print(" REE | MAX. DIF. ABS. | MES | ORDEM |" +
