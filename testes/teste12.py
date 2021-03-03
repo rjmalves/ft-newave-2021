@@ -99,7 +99,12 @@ for ree in IDS_REES:
             c_atual = pmo.configuracoes_expansao.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
-            ccruz = yw.corr_cruzada_media(p, 12, configs)
+            if ree == 4:
+                  ccruz = yw.corr_cruzada_media(p, 12, configs, True)
+                  print(f"of {serie_ccruz[mes][:4]}")
+                  print(f"es {ccruz[:4]}")
+            else:
+                  ccruz = yw.corr_cruzada_media(p, 12, configs)
             # Atualiza as variáveis com as máximas diferenças
             for i, c in enumerate(ccruz):
                 oficial = serie_ccruz[mes][i]

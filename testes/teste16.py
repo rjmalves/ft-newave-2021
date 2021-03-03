@@ -36,7 +36,7 @@ from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_parpa"
+diretorio_parpa = "/home/rogerio/ONS/validacao_newave2744/pmo_2020_11_parpa"
 
 # Lê o arquivo pmo.dat
 pmo = LeituraPMO(diretorio_parpa).le_arquivo()

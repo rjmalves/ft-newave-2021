@@ -1,4 +1,3 @@
-from parpa.base.modelo import Modelo
 import numpy as np
 from typing import List
 

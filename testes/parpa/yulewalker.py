@@ -169,8 +169,12 @@ class YuleWalkerPARA:
                  series_por_config: Dict[int, np.ndarray]):
 
         self.sinal = deepcopy(series_por_config)
+        self.sinal_n = deepcopy(series_por_config)
         self.n_amostras, self.periodos = self.sinal[1].shape
+        self.tabela_configs = np.ones((2 * self.periodos,),
+                                       dtype=np.int64)
         self.medias = self._medias_per(self.sinal)
+        self.medias_n = self._medias_per(self.sinal)
         # O atributo ddof é usado para indicar se o desvio padrão
         # calculado é amostral ou populacional (é a quantia
         # subtraída do denoiminador - 'graus de liberdade')
@@ -187,6 +191,13 @@ class YuleWalkerPARA:
                 med = np.mean(self.medias[c][1:, j])
                 dsv = np.std(self.medias[c][1:, j], ddof=self.ddof)
                 self.medias[c][1:, j] = (self.medias[c][1:, j] - med) / dsv
+
+    def _atualiza_tabela_configs(self, tabela_configs: np.ndarray):
+        """
+        Gera novamente a tabela de sinais após receber uma
+        atualização na tabela de configurações.
+        """
+        pass
 
     def _medias_per(self ,
                     sinal: Dict[int, np.ndarray]) -> Dict[int, np.ndarray]:
@@ -281,39 +292,6 @@ class YuleWalkerPARA:
         u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_med,
                                                          sinal_lag))
         return u
-
-    def _corr_media(self,
-                    p: int,
-                    lag: int,
-                    cfg_p: int,
-                    cfg_lag: int) -> float:
-        """
-        Realiza o cálculo da correlação entre o sinal defasado no
-        tempo com a componente da média anual.
-        
-        OBS: Pela forma como é calculada a matriz de médias anuais,
-        a variável `A(t - 1)`, como no relatório do CEPEL, que da
-        origem ao termo `RHO(m - 1)` está associada a um lag `m`
-        nesta função.
-
-        Segue o mesmo princípio da autocorrelação, porém realizando
-        o produto dos dois sinais em questão ao invés do mesmo sinal
-        com lag.
-        """
-        lag_mod = lag % self.periodos
-        sinal_med = deepcopy(self.medias[cfg_p][:, p])
-        sinal_lag = deepcopy(self.sinal[cfg_lag][:, p - lag_mod])
-        # Se o mês de referência para o cálculo das
-        # autocorrelações com o lag "volta um ano",
-        # então descontamos uma amostra de cada.
-        if p < lag_mod:
-            sinal_med = sinal_med[1:]
-            sinal_lag = sinal_lag[:-1]
-        u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_med,
-                                                         sinal_lag))
-        cc =  u / (np.std(sinal_med, ddof=self.ddof) *
-                   np.std(sinal_lag, ddof=self.ddof))
-        return cc
 
     def _matriz_extendida(self, p: int, lag: int) -> np.ndarray:
         """
@@ -451,11 +429,14 @@ class YuleWalkerPARA:
     def corr_cruzada_media(self,
                            p: int,
                            maxlag: int,
-                           configs: np.ndarray) -> List[float]:
+                           configs: np.ndarray,
+                           pr: bool = False) -> List[float]:
         """
         """
         self.tabela_configs = np.reshape(configs,
                                          (configs.size,))
+        if pr:
+            print(self.tabela_configs)
         # Para cada período, obtém os coeficientes
         ccruz: List[float] = []
         # Calcula as correlações cruzadas
