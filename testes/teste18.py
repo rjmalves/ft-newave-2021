@@ -27,13 +27,11 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from parpa.correlacoesespaciais import CorrelacoesEspaciais
 from inewave.newave.parp import LeituraPARp
 from inewave.config import REES
 from typing import Dict
 import numpy as np
-from time import sleep
-from parpa.yulewalker import YuleWalkerPARA
+from parpa.correlacoesespaciais import CorrelacoesEspaciais
 
 
 # Variáveis auxiliares no processo

@@ -87,14 +87,15 @@ for ree in IDS_REES:
     for a, ano in enumerate(parp.anos_estudo):
         ordens_finais = parp.ordens_finais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
+        cfgs = pmo.configuracoes_entrada_reservatorio
         if a == 0:
-            c_atual = pmo.configuracoes_expansao.configs_por_ano[ano]
+            c_atual = cfgs.configs_por_ano[ano]
             c_ant = list(np.ones_like(c_atual, dtype=np.int64))
             configs = np.array([c_ant, c_atual])
         else:
             a_ant = parp.anos_estudo[a - 1]
-            c_ant = pmo.configuracoes_expansao.configs_por_ano[a_ant]
-            c_atual = pmo.configuracoes_expansao.configs_por_ano[ano]
+            c_ant = cfgs.configs_por_ano[a_ant]
+            c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         # Realiza a estimação para o ano
         coefs_estimados = yw.estima_modelo(ordens_finais, configs)
