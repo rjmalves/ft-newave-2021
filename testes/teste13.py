@@ -36,7 +36,7 @@ from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_parpa"
+diretorio_parpa = "/home/rogerio/ONS/validacao_newave2744/pmo_2020_11_parpa"
 
 # Lê o arquivo pmo.dat
 pmo = LeituraPMO(diretorio_parpa).le_arquivo()
@@ -99,6 +99,8 @@ for ree in IDS_REES:
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
             facp = yw.facp(p, 12, configs)
+            # print(f"OF = {serie_facp[mes][:6]}")
+            # print(f"ES = {facp[:6]}")
             # Atualiza as variáveis com as máximas diferenças
             for i, c in enumerate(facp):
                 oficial = serie_facp[mes][i]

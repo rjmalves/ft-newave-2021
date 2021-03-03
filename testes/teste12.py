@@ -36,7 +36,7 @@ from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_parpa"
+diretorio_parpa = "/home/rogerio/ONS/validacao_newave2744/pmo_2020_11_parpa"
 
 # Lê o arquivo pmo.dat
 pmo = LeituraPMO(diretorio_parpa).le_arquivo()
@@ -99,12 +99,7 @@ for ree in IDS_REES:
             c_atual = pmo.configuracoes_expansao.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
-            if ree == 4:
-                  ccruz = yw.corr_cruzada_media(p, 12, configs, True)
-                  print(f"of {serie_ccruz[mes][:4]}")
-                  print(f"es {ccruz[:4]}")
-            else:
-                  ccruz = yw.corr_cruzada_media(p, 12, configs)
+            ccruz = yw.corr_cruzada_media(p, 12, configs)
             # Atualiza as variáveis com as máximas diferenças
             for i, c in enumerate(ccruz):
                 oficial = serie_ccruz[mes][i]

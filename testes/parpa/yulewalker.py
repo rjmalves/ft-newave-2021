@@ -168,39 +168,46 @@ class YuleWalkerPARA:
     def __init__(self,
                  series_por_config: Dict[int, np.ndarray]):
 
-        self.sinal = deepcopy(series_por_config)
-        self.sinal_n = deepcopy(series_por_config)
-        self.n_amostras, self.periodos = self.sinal[1].shape
-        self.tabela_configs = np.ones((2 * self.periodos,),
-                                       dtype=np.int64)
-        self.medias = self._medias_per(self.sinal)
-        self.medias_n = self._medias_per(self.sinal)
         # O atributo ddof é usado para indicar se o desvio padrão
         # calculado é amostral ou populacional (é a quantia
         # subtraída do denoiminador - 'graus de liberdade')
         self.ddof = 0
-        # Normaliza o sinal por período
-        for c in self.sinal.keys():
-            for j in range(self.periodos):
-                med = np.mean(self.sinal[c][:, j])
-                dsv = np.std(self.sinal[c][:, j], ddof=self.ddof)
-                self.sinal[c][:, j] = (self.sinal[c][:, j] - med) / dsv
-        # Normaliza as médias por período
-        for c in self.medias.keys():
-            for j in range(self.periodos):
-                med = np.mean(self.medias[c][1:, j])
-                dsv = np.std(self.medias[c][1:, j], ddof=self.ddof)
-                self.medias[c][1:, j] = (self.medias[c][1:, j] - med) / dsv
+        self.sinal = deepcopy(series_por_config)
+        self.n_amostras, self.periodos = self.sinal[1].shape
+        self._atualiza_tabela_configs(np.ones((2 * self.periodos,),
+                                              dtype=np.int64))
 
-    def _atualiza_tabela_configs(self, tabela_configs: np.ndarray):
+    def _atualiza_tabela_configs(self, configs: np.ndarray):
         """
         Gera novamente a tabela de sinais após receber uma
         atualização na tabela de configurações.
         """
-        pass
+        self.tabela_configs = np.reshape(configs,
+                                         (configs.size,))
+        self.sinal_bkp = np.zeros((self.n_amostras,
+                                 2 * self.periodos))
+        self.sinal_n = np.zeros((self.n_amostras,
+                                 2 * self.periodos))
+        # Lê os sinais brutos e monta o horizonte de 24 meses
+        # das configurações respectivas
+        for i, c in enumerate(self.tabela_configs):
+            self.sinal_bkp[:, i] = deepcopy(self.sinal[c][:, i % self.periodos])
+        # Gera as médias por período
+        self.medias = self._medias_per(deepcopy(self.sinal_bkp))
+        # Normaliza o sinal
+        for j in range(2 * self.periodos):
+            med = np.mean(self.sinal_bkp[:, j])
+            dsv = np.std(self.sinal_bkp[:, j], ddof=self.ddof)
+            self.sinal_n[:, j] = (self.sinal_bkp[:, j] - med) / dsv
+        # Normaliza as médias
+        self.medias_n = np.zeros_like(self.medias)
+        for j in range(self.periodos):
+            med = np.mean(self.medias[1:, j])
+            dsv = np.std(self.medias[1:, j], ddof=self.ddof)
+            self.medias_n[1:, j] = (self.medias[1:, j] - med) / dsv
 
     def _medias_per(self ,
-                    sinal: Dict[int, np.ndarray]) -> Dict[int, np.ndarray]:
+                    sinal: np.ndarray) -> np.ndarray:
         """
         Calcula a média dos últimos períodos e retorna a matriz
         de médias.
@@ -211,24 +218,26 @@ class YuleWalkerPARA:
         função de covariância segundo o CEPEL significa um lag
         `0` na função de covariância deste código.
         """
-        medias_configs: Dict[int, np.ndarray] = {}
-        for c in self.sinal.keys():
-            # Coloca todos os dados em sequência para facilitar
-            sinal_seq = np.array(sinal[c].reshape(sinal[c].size,))
-            medias = np.zeros((self.n_amostras, self.periodos))
-            for i in range(1, self.n_amostras):
-                for j in range(self.periodos):
-                    i_sinal = (i - 1) * self.periodos + j
-                    f_sinal = i_sinal + self.periodos
-                    medias[i, j] = np.mean(sinal_seq[i_sinal:f_sinal])
-            medias_configs[c] = medias
-        return medias_configs
+        # Coloca todos os dados em sequência para facilitar
+        medias = np.zeros((self.n_amostras, self.periodos))
+        for i in range(1, self.n_amostras):
+            for j in range(self.periodos):
+                i_sinal = j
+                f_sinal = i_sinal + self.periodos
+                   # Extrai a parcela do ano anterior
+                sinal_anterior = sinal[i - 1,
+                                       i_sinal:min([f_sinal, 12])]
+                # Extrai a parcela do ano atual
+                sinal_atual = sinal[i,
+                                    min([f_sinal, 12]):f_sinal]
+                # Concatena e calcula a média
+                medias[i, j] = np.mean(np.concatenate((sinal_anterior,
+                                                       sinal_atual)))
+        return medias
 
     def _autocov(self,
                  p: int,
-                 lag: int,
-                 cfg_p: int,
-                 cfg_lag: int) -> float:
+                 lag: int) -> float:
         """
         Calcula a autocovariância para o sinal normalizado, em
         um período `p` e com lag `lag`. A autocovariância é
@@ -249,13 +258,12 @@ class YuleWalkerPARA:
         and Environmental Systems, Volume 45, Cap. 14. 1994.
 
         """
-        lag_mod = lag % self.periodos
-        sinal_m = deepcopy(self.sinal[cfg_p][:, p])
-        sinal_lag = deepcopy(self.sinal[cfg_lag][:, p - lag_mod])
+        sinal_m = deepcopy(self.sinal_n[:, p])
+        sinal_lag = deepcopy(self.sinal_n[:, lag])
         # Se o mês de referência para o cálculo das
         # autocorrelações, com o lag "volta um ano",
         # então descontamos uma amostra de cada.
-        if p < lag_mod:
+        if lag < self.periodos and p >= self.periodos:
             sinal_m = sinal_m[1:]
             sinal_lag = sinal_lag[:-1]
         u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_m,
@@ -264,9 +272,7 @@ class YuleWalkerPARA:
 
     def _cov_media(self,
                    p: int,
-                   lag: int,
-                   cfg_p: int,
-                   cfg_lag: int) -> float:
+                   lag: int) -> float:
         """
         Realiza o cálculo da covariância entre o sinal defasado no
         tempo com a componente da média anual.
@@ -280,13 +286,12 @@ class YuleWalkerPARA:
         o produto dos dois sinais em questão ao invés do mesmo sinal
         com lag.
         """
-        lag_mod = lag % self.periodos
-        sinal_med = deepcopy(self.medias[cfg_p][:, p])
-        sinal_lag = deepcopy(self.sinal[cfg_lag][:, p - lag_mod])
+        sinal_med = deepcopy(self.medias_n[:, p % self.periodos])
+        sinal_lag = deepcopy(self.sinal_n[:, lag])
         # Se o mês de referência para o cálculo das
         # autocorrelações com o lag "volta um ano",
         # então descontamos uma amostra de cada.
-        if p < lag_mod:
+        if lag < self.periodos:
             sinal_med = sinal_med[1:]
             sinal_lag = sinal_lag[:-1]
         u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_med,
@@ -301,27 +306,23 @@ class YuleWalkerPARA:
         """
         ORDEM_MATRIZ = lag + 2
         # Monta a matriz YW
+        # print(f"MATRIZ EXTENDIDA p = {p} lag = {lag}")
         mat = np.ones((ORDEM_MATRIZ, ORDEM_MATRIZ))
         for i in range(ORDEM_MATRIZ - 1):
             for j in range(i + 1, ORDEM_MATRIZ - 1):
-                m = (p - i) % self.periodos
+                m = p - i
                 lag = j - i
-                cfg_p = self.periodos + m
-                cfg_lag = max([1, cfg_p - lag])
-                mat[i, j] = self._autocov(m,
-                                          lag,
-                                          cfg_p,
-                                          cfg_lag)
+                col_p = self.periodos + m
+                # print(f" i = {i} j = {j} COLUNA P = {col_p} COLUNA LAG = {col_p - lag}")
+                mat[i, j] = self._autocov(col_p,
+                                          col_p - lag)
                 mat[j, i] = mat[i, j]
         # Obtém os coeficientes
         # Adiciona os termos da média do período
         for i in range(ORDEM_MATRIZ - 1):
-            cfg_p = self.periodos + p
-            cfg_lag = max([1, cfg_p - i])
-            mat[ORDEM_MATRIZ - 1, i] = self._cov_media(p,
-                                                       i,
-                                                       cfg_p,
-                                                       cfg_lag)
+            col_p = self.periodos + p
+            mat[ORDEM_MATRIZ - 1, i] = self._cov_media(col_p,
+                                                       col_p - i)
             mat[i, ORDEM_MATRIZ - 1] = mat[ORDEM_MATRIZ - 1, i]
 
         return mat
@@ -352,8 +353,7 @@ class YuleWalkerPARA:
         resolvendo o sistema de equações de Yule-Walker para a
         lista de ordens `[p1, p2, ..., pm]` fornecidas.
         """
-        self.tabela_configs = np.reshape(configs,
-                                         (configs.size,))
+        self._atualiza_tabela_configs(configs)
         coefs: List[List[float]] = []
         for p in range(self.periodos):
             o = ordens[p]
@@ -392,8 +392,7 @@ class YuleWalkerPARA:
 
         A FACP é obtida na entrada [0, 1] ou [1, 0] de COND.
         """
-        self.tabela_configs = np.reshape(configs,
-                                         (configs.size,))
+        self._atualiza_tabela_configs(configs)
         # Para cada período, obtém os coeficientes
         acps: List[float] = []
         mat = self._matriz_extendida(p, maxlag)
@@ -429,22 +428,15 @@ class YuleWalkerPARA:
     def corr_cruzada_media(self,
                            p: int,
                            maxlag: int,
-                           configs: np.ndarray,
-                           pr: bool = False) -> List[float]:
+                           configs: np.ndarray) -> List[float]:
         """
         """
-        self.tabela_configs = np.reshape(configs,
-                                         (configs.size,))
-        if pr:
-            print(self.tabela_configs)
+        self._atualiza_tabela_configs(configs)
         # Para cada período, obtém os coeficientes
         ccruz: List[float] = []
         # Calcula as correlações cruzadas
         for o in range(0, maxlag):
-            cfg_p = self.periodos + p
-            cfg_lag = max([1, cfg_p - o])
-            ccruz.append(self._cov_media(p,
-                                         o,
-                                         cfg_p,
-                                         cfg_lag))
+            col_p = self.periodos + p
+            ccruz.append(self._cov_media(col_p,
+                                         col_p - o))
         return ccruz
