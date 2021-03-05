@@ -1,4 +1,5 @@
 inewave
+idecomp==0.0.3b0
 numpy
 scipy
 matplotlib
