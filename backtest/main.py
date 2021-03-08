@@ -1,16 +1,9 @@
-from idecomp.decomp.modelos.relato import Relato
-from idecomp.decomp.relato import LeituraRelato
-from typing import Dict, List
-import matplotlib.pyplot as plt
-import numpy as np
-import os
-from caso import Caso
-from caso import SUBSISTEMAS
-from graficos import grafico_cmo_subsistema
-from graficos import grafico_earm_sin
-from graficos import grafico_earm_subsistema
-from graficos import grafico_gt_sin
-from graficos import grafico_gt_subsistema
+from caso import Caso  # type: ignore
+from graficos import grafico_cmo_subsistema  # type: ignore
+from graficos import grafico_earm_sin  # type: ignore
+from graficos import grafico_earm_subsistema  # type: ignore
+from graficos import grafico_gt_sin  # type: ignore
+from graficos import grafico_gt_subsistema  # type: ignore
 
 
 def main():
@@ -48,6 +41,7 @@ def main():
     # smap = Caso.constroi_caso_de_pasta(dir_smap,
     #                                    "SMAP 1º Mês")
     # casos = [smap]
+
     # Gera os gráficos
     saida = "saidas/"
     # # CMO por subsistema
@@ -60,6 +54,7 @@ def main():
     grafico_earm_sin(casos, saida)
     # GT para SIN
     grafico_gt_sin(casos, saida)
+
 
 if __name__ == "__main__":
     main()

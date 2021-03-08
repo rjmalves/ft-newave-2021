@@ -4,7 +4,7 @@
 # TESTE 06
 #
 # Processar um caso com a funcionalidade PAR(p)-A habilitada,
-# executar o programa NWLISTCF e avaliar: 
+# executar o programa NWLISTCF e avaliar:
 # 1) impressão dos estados afluência passada e parcela anual (X)
 #    no arquivo estados.rel
 # 2) impressão do novo coeficiente (PIx) dos cortes no arquivo

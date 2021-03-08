@@ -28,13 +28,13 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.dger import LeituraDGer
-from inewave.newave.pmo import LeituraPMO
+from inewave.newave.dger import LeituraDGer  # type: ignore
+from inewave.newave.pmo import LeituraPMO  # type: ignore
 
 
 # Variáveis auxiliares no processo
-diretorio_oficial = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_oficial"
-diretorio_parpa = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_parpa"
+diretorio_oficial = ""
+diretorio_parpa = ""
 # Lê os arquivos
 dger_oficial = LeituraDGer(diretorio_oficial).le_arquivo()
 pmo_oficial = LeituraPMO(diretorio_oficial).le_arquivo()
@@ -51,10 +51,14 @@ flags_pmo_parpa = pmo_parpa.dados_gerais.afluencia_anual_parp
 
 print("PMO Oficial")
 print(f"Eco de saída igual: {eco_igual_oficial}")
-print(f"Flags no dger: AFL. ANUAL = {flags_dger_oficial[0]} RED ORDEM = {flags_dger_oficial[1]}")
-print(f"Flags no  pmo: AFL. ANUAL = {flags_pmo_oficial[0]} RED ORDEM = {flags_pmo_oficial[1]}")
+print(f"Flags no dger: AFL. ANUAL = {flags_dger_oficial[0]}"
+      + f" RED ORDEM = {flags_dger_oficial[1]}")
+print(f"Flags no  pmo: AFL. ANUAL = {flags_pmo_oficial[0]}"
+      + f" RED ORDEM = {flags_pmo_oficial[1]}")
 
 print("PMO PAR(p)-A")
 print(f"Eco de saída igual: {eco_igual_parpa}")
-print(f"Flags no dger: AFL. ANUAL = {flags_dger_parpa[0]} RED ORDEM = {flags_dger_parpa[1]}")
-print(f"Flags no  pmo: AFL. ANUAL = {flags_pmo_parpa[0]} RED ORDEM = {flags_pmo_parpa[1]}")
+print(f"Flags no dger: AFL. ANUAL = {flags_dger_parpa[0]}"
+      + f" RED ORDEM = {flags_dger_parpa[1]}")
+print(f"Flags no  pmo: AFL. ANUAL = {flags_pmo_parpa[0]}"
+      + f" RED ORDEM = {flags_pmo_parpa[1]}")

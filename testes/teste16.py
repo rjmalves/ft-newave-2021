@@ -27,9 +27,9 @@
 #
 # 6- Observar a saída exibida no terminal
 
-from inewave.newave.pmo import LeituraPMO
-from inewave.newave.parp import LeituraPARp
-from inewave.config import REES
+from inewave.newave.pmo import LeituraPMO  # type: ignore
+from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
 from parpa.yulewalker import YuleWalkerPARA
@@ -58,10 +58,10 @@ periodo_max_dif_ree: Dict[int, int] = {ree: 0
                                        for ree in IDS_REES}
 ordem_max_dif_ree: Dict[int, int] = {ree: 0
                                      for ree in IDS_REES}
-coef_o_max_dif_ree: Dict[int, int] = {ree: 0
-                                      for ree in IDS_REES}
-coef_e_max_dif_ree: Dict[int, int] = {ree: 0
-                                      for ree in IDS_REES}
+coef_o_max_dif_ree: Dict[int, float] = {ree: 0
+                                        for ree in IDS_REES}
+coef_e_max_dif_ree: Dict[int, float] = {ree: 0
+                                        for ree in IDS_REES}
 # Máxima diferença percentual por REE
 max_dif_percent_ree: Dict[int, float] = {ree: -1e4
                                          for ree in IDS_REES}
@@ -71,10 +71,10 @@ periodo_max_dif_perc_ree: Dict[int, int] = {ree: 0
                                             for ree in IDS_REES}
 ordem_max_dif_perc_ree: Dict[int, int] = {ree: 0
                                           for ree in IDS_REES}
-coef_o_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                           for ree in IDS_REES}
-coef_e_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                           for ree in IDS_REES}
+coef_o_max_dif_perc_ree: Dict[int, float] = {ree: 0
+                                             for ree in IDS_REES}
+coef_e_max_dif_perc_ree: Dict[int, float] = {ree: 0
+                                             for ree in IDS_REES}
 
 
 # Faz a estimação para todas as configurações, no período de estudo
@@ -103,21 +103,22 @@ for ree in IDS_REES:
         for p, coefs_p in enumerate(coefs_estimados):
             for i, c in enumerate(coefs_p):
                 dif = abs(c - coefs[mes][i])
-                dif_percentual = abs(100 * abs(c - coefs[mes][i]) / coefs[p][i])
+                dif_percentual = abs(100 * abs(c - coefs[mes][i])
+                                     / coefs[p][i])
                 if dif > max_dif_ree[ree]:
-                        max_dif_ree[ree] = dif
-                        ano_max_dif_ree[ree] = ano
-                        periodo_max_dif_ree[ree] = p + 1
-                        ordem_max_dif_ree[ree] = i + 1
-                        coef_e_max_dif_ree[ree] = c
-                        coef_o_max_dif_ree[ree] = coefs[p][i]
+                    max_dif_ree[ree] = dif
+                    ano_max_dif_ree[ree] = ano
+                    periodo_max_dif_ree[ree] = p + 1
+                    ordem_max_dif_ree[ree] = i + 1
+                    coef_e_max_dif_ree[ree] = c
+                    coef_o_max_dif_ree[ree] = coefs[p][i]
                 if dif_percentual > max_dif_percent_ree[ree]:
-                        max_dif_percent_ree[ree] = dif_percentual
-                        ano_max_dif_perc_ree[ree] = ano
-                        periodo_max_dif_perc_ree[ree] = p + 1
-                        ordem_max_dif_perc_ree[ree] = i + 1
-                        coef_e_max_dif_perc_ree[ree] = c
-                        coef_o_max_dif_perc_ree[ree] = coefs[p][i]
+                    max_dif_percent_ree[ree] = dif_percentual
+                    ano_max_dif_perc_ree[ree] = ano
+                    periodo_max_dif_perc_ree[ree] = p + 1
+                    ordem_max_dif_perc_ree[ree] = i + 1
+                    coef_e_max_dif_perc_ree[ree] = c
+                    coef_o_max_dif_perc_ree[ree] = coefs[p][i]
             mes += 1
 
 print("")

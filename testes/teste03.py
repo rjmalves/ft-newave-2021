@@ -4,7 +4,7 @@
 # TESTE 03
 #
 # Processar PMOs/PLDs na versão 27.4.3 variando o número
-# de processadores e em máquinas diferentes. 
+# de processadores e em máquinas diferentes.
 # Os resultados devem ser idênticos.
 
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
@@ -28,22 +28,23 @@
 # 6- Observar a saída exibida no terminal e a figura
 #    gerada na pasta saidas/.
 
-from inewave.newave.pmo import LeituraPMO
-from inewave.newave.parp import LeituraPARp
-from inewave.nwlistop.mediassin import LeituraMediasSIN
-from inewave.nwlistop.mediasmerc import LeituraMediasMerc
+from inewave.newave.pmo import LeituraPMO  # type: ignore
+from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.nwlistop.mediassin import LeituraMediasSIN  # type: ignore
+from inewave.nwlistop.mediasmerc import LeituraMediasMerc  # type: ignore
 import os
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
+
 
 # Variáveis auxiliares no processo
 # Consideradas três execuções do NEWAVE, por exemplo:
 # A - Máquina 1, Nº Processadores N
 # B - Máquina 1, Nº Processadores M
 # C - Máquina 2, Nº Processadores N ou M
-diretorio_execA = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_01_oficial_64proc"
-diretorio_execB = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_01_oficial_72proc"
-diretorio_execC = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_01_oficial_96proc"
+diretorio_execA = ""
+diretorio_execB = ""
+diretorio_execC = ""
 
 # Lê os arquivos de cada diretório
 pmo_execA = LeituraPMO(diretorio_execA).le_arquivo()
@@ -85,9 +86,12 @@ max_iter = max(iters_A + iters_B + iters_C)
 # Gera o gráfico
 largura = 0.5
 plt.figure(figsize=(10, 5))
-plt.bar(np.array(iters_A)[::3] , tempos_A[::3], largura, label="Execução A")
-plt.bar(np.array(iters_B)[::3] + 0.5, tempos_B[::3], largura, label="Execução B")
-plt.bar(np.array(iters_C)[::3] + 1.0, tempos_C[::3], largura, label="Execução C")
+plt.bar(np.array(iters_A)[::3],
+        tempos_A[::3], largura, label="Execução A")
+plt.bar(np.array(iters_B)[::3] + 0.5,
+        tempos_B[::3], largura, label="Execução B")
+plt.bar(np.array(iters_C)[::3] + 1.0,
+        tempos_C[::3], largura, label="Execução C")
 plt.legend()
 plt.title("Tempos de Execução das Iterações (Teste 03 - FT NEWAVE 2021)")
 plt.xlabel("Iteração")

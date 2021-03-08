@@ -1,10 +1,11 @@
-from idecomp.decomp.modelos.relato import Relato
-from idecomp.decomp.relato import LeituraRelato
+
+from idecomp.config import SUBSISTEMAS  # type: ignore
+from idecomp.decomp.modelos.relato import Relato  # type: ignore
+from idecomp.decomp.relato import LeituraRelato  # type: ignore
 from typing import Dict, List
 import numpy as np
 import os
 
-SUBSISTEMAS = ["SE", "S", "NE", "N"]
 
 class Caso:
     """
@@ -12,10 +13,10 @@ class Caso:
     def __init__(self,
                  nome: str,
                  n_revs: int,
-                 cmo_subsis: Dict[str, float],
-                 earm_subsis: Dict[str, float],
+                 cmo_subsis: Dict[str, List[float]],
+                 earm_subsis: Dict[str, List[float]],
                  earm_sin: List[float],
-                 gt_subsis: Dict[str, float],
+                 gt_subsis: Dict[str, List[float]],
                  gt_sin: List[float]
                  ):
         self.nome = nome
@@ -53,18 +54,18 @@ class Caso:
         earm_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
         earm_sin: List[float] = []
         primeiro = True
-        for _, r in relatos.items():
-            cmos = r.cmo_medio_subsistema
-            gts = r.geracao_termica_subsistema
-            earmax = r.armazenamento_maximo_subsistema
+        for _, re in relatos.items():
+            cmos = re.cmo_medio_subsistema
+            gts = re.geracao_termica_subsistema
+            earmax = re.armazenamento_maximo_subsistema
             earmax_sin = sum(list(earmax.values()))
             for s in SUBSISTEMAS:
                 cmo_subsis[s].append(cmos[s][0])
                 gt_subsis[s].append(np.sum(gts[s]))
                 if primeiro:
-                    earms = r.energia_armazenada_inicial_subsistema[s]
+                    earms = re.energia_armazenada_inicial_subsistema[s]
                 else:
-                    earms = r.energia_armazenada_subsistema[s][0]
+                    earms = re.energia_armazenada_subsistema[s][0]
                 earm_subsis[s].append(earms)
             # Calcula GT do SIN
             gt_sin_r = sum([gt_subsis[s][-1] for s in SUBSISTEMAS])
@@ -85,5 +86,3 @@ class Caso:
                     earm_sin,
                     gt_subsis,
                     gt_sin)
-
-

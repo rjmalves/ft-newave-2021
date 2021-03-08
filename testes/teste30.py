@@ -30,10 +30,10 @@
 #
 # 6- Observar os gráficos na pasta saidas/
 
-from inewave.newave.pmo import LeituraPMO
-from inewave.newave.modelos.pmo import PMO
+from inewave.newave.pmo import LeituraPMO  # type: ignore
+from inewave.newave.modelos.pmo import PMO  # type: ignore
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 from typing import List
 import os
 
@@ -65,15 +65,15 @@ for c in caminhos:
     pmos.append(leitor.le_arquivo())
 
 x = np.arange(0, 100, 10)
-plt.figure(figsize=(10,5))
+plt.figure(figsize=(10, 5))
 for n, pmo in enumerate(pmos):
     y = [pmo.retas_perdas_engolimento.funcao_perdas(8, i) for i in x]
     plt.plot(x, y,
-                label=nomes[n],
-                c=CORES[n],
-                linewidth=3.0,
-                linestyle=ESTILOS_LINHA[n],
-                alpha=0.8)
+             label=nomes[n],
+             c=CORES[n],
+             linewidth=3.0,
+             linestyle=ESTILOS_LINHA[n],
+             alpha=0.8)
 plt.title("Perdas por Engolimento Máximo (MARS) - REE B. Monte")
 plt.xlabel("EFIOB (MWmes)")
 plt.ylabel("Perdas (MWmes)")
@@ -83,15 +83,15 @@ plt.savefig("saidas/teste30_zoom.png")
 plt.close()
 
 x = np.arange(0, 15000, 100)
-plt.figure(figsize=(10,5))
+plt.figure(figsize=(10, 5))
 for n, pmo in enumerate(pmos):
     y = [pmo.retas_perdas_engolimento.funcao_perdas(8, i) for i in x]
     plt.plot(x, y,
-                label=nomes[n],
-                c=CORES[n],
-                linewidth=3.0,
-                linestyle=ESTILOS_LINHA[n],
-                alpha=0.8)
+             label=nomes[n],
+             c=CORES[n],
+             linewidth=3.0,
+             linestyle=ESTILOS_LINHA[n],
+             alpha=0.8)
 plt.title("Perdas por Engolimento Máximo (MARS) - REE B. Monte")
 plt.xlabel("EFIOB (MWmes)")
 plt.ylabel("Perdas (MWmes)")

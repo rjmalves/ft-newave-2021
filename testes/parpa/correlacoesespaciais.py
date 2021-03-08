@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-from typing import List, Dict
+from typing import Dict
 
 
 class CorrelacoesEspaciais:

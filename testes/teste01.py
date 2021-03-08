@@ -29,10 +29,10 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.pmo import LeituraPMO
-from inewave.newave.parp import LeituraPARp
-from inewave.nwlistop.mediassin import LeituraMediasSIN
-from inewave.nwlistop.mediasmerc import LeituraMediasMerc
+from inewave.newave.pmo import LeituraPMO  # type: ignore
+from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.nwlistop.mediassin import LeituraMediasSIN  # type: ignore
+from inewave.nwlistop.mediasmerc import LeituraMediasMerc  # type: ignore
 
 
 # Variáveis auxiliares no processo

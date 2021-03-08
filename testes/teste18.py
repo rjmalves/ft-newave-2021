@@ -27,8 +27,8 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.parp import LeituraPARp
-from inewave.config import REES
+from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
 from parpa.correlacoesespaciais import CorrelacoesEspaciais
@@ -60,14 +60,14 @@ cfgs = range(1, n_cfgs + 1)
 # Variaveis CORR ESP ANUAL
 max_dif_cfg_an: Dict[int, float] = {cfg: -1e4
                                     for cfg in cfgs}
-ree1_max_dif_cfg_an: Dict[int, int] = {cfg: 0
-                                       for cfg in cfgs}
-ree2_max_dif_cfg_an: Dict[int, int] = {cfg: 0
-                                       for cfg in cfgs}
-coef_o_max_dif_cfg_an: Dict[int, int] = {cfg: 0
+ree1_max_dif_cfg_an: Dict[int, float] = {cfg: 0
                                          for cfg in cfgs}
-coef_e_max_dif_cfg_an: Dict[int, int] = {cfg: 0
+ree2_max_dif_cfg_an: Dict[int, float] = {cfg: 0
                                          for cfg in cfgs}
+coef_o_max_dif_cfg_an: Dict[int, float] = {cfg: 0
+                                           for cfg in cfgs}
+coef_e_max_dif_cfg_an: Dict[int, float] = {cfg: 0
+                                           for cfg in cfgs}
 # Variaveis CORR ESP MENSAL
 max_dif_cfg_me: Dict[int, float] = {cfg: -1e4
                                     for cfg in cfgs}

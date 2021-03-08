@@ -3,3 +3,5 @@ idecomp
 numpy
 scipy
 matplotlib
+mypy
+flake8

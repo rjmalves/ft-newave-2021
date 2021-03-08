@@ -1,10 +1,9 @@
 
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.pyplot as plt  # type: ignore
 import os
 from typing import List, Tuple
-from caso import Caso
-from caso import SUBSISTEMAS
+from caso import Caso  # type: ignore
+from caso import SUBSISTEMAS  # type: ignore
 
 CORES = ["black",
          "deepskyblue",
@@ -13,10 +12,11 @@ CORES = ["black",
          "lightsalmon",
          "orangered"]
 
-def xticks_graficos() -> Tuple[List[float], List[str]]:
+
+def xticks_graficos() -> Tuple[List[int], List[str]]:
     """
     """
-    ticks = range(61)
+    ticks = list(range(61))
     # labels = ["rv0\nJAN/20", "rv1", "rv2", "rv3", "rv4",
     #           "rv0\nFEV/20", "rv1", "rv2", "rv3",
     #           "rv0\nMAR/20", "rv1", "rv2", "rv3", 
