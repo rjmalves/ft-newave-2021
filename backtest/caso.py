@@ -14,13 +14,17 @@ class Caso:
                  n_revs: int,
                  cmo_subsis: Dict[str, float],
                  earm_subsis: Dict[str, float],
-                 gt_subsis: Dict[str, float]
+                 earm_sin: List[float],
+                 gt_subsis: Dict[str, float],
+                 gt_sin: List[float]
                  ):
         self.nome = nome
         self.n_revs = n_revs
         self.cmo_subsis = cmo_subsis
         self.earm_subsis = earm_subsis
+        self.earm_sin = earm_sin
         self.gt_subsis = gt_subsis
+        self.gt_sin = gt_sin
 
     @classmethod
     def constroi_caso_de_pasta(cls,
@@ -43,14 +47,17 @@ class Caso:
             relatos[r] = LeituraRelato(dir).le_arquivo(r)
 
         # Prepara as listas de dados
-        num_casos = len(relatos_pasta)
         cmo_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
         gt_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
+        gt_sin: List[float] = []
         earm_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
+        earm_sin: List[float] = []
         primeiro = True
-        for a, r in relatos.items():
+        for _, r in relatos.items():
             cmos = r.cmo_medio_subsistema
             gts = r.geracao_termica_subsistema
+            earmax = r.armazenamento_maximo_subsistema
+            earmax_sin = sum(list(earmax.values()))
             for s in SUBSISTEMAS:
                 cmo_subsis[s].append(cmos[s][0])
                 gt_subsis[s].append(np.sum(gts[s]))
@@ -59,6 +66,13 @@ class Caso:
                 else:
                     earms = r.energia_armazenada_subsistema[s][0]
                 earm_subsis[s].append(earms)
+            # Calcula GT do SIN
+            gt_sin_r = sum([gt_subsis[s][-1] for s in SUBSISTEMAS])
+            gt_sin.append(gt_sin_r)
+            # Calcula EARM do SIN
+            earm_sin_r = (sum([(earm_subsis[s][-1] / 100) * earmax[s]
+                                for s in SUBSISTEMAS]) / earmax_sin)
+            earm_sin.append(100 * earm_sin_r)
             if primeiro:
                 primeiro = False
         
@@ -68,4 +82,8 @@ class Caso:
                     n_revs,
                     cmo_subsis,
                     earm_subsis,
-                    gt_subsis)
+                    earm_sin,
+                    gt_subsis,
+                    gt_sin)
+
+
