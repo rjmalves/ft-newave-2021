@@ -20,12 +20,12 @@ def xticks_graficos() -> Tuple[List[int], List[str]]:
     ticks = list(range(61))
     # labels = ["rv0\nJAN/20", "rv1", "rv2", "rv3", "rv4",
     #           "rv0\nFEV/20", "rv1", "rv2", "rv3",
-    #           "rv0\nMAR/20", "rv1", "rv2", "rv3", 
-    #           "rv0\nABR/20", "rv1", "rv2", "rv3", 
+    #           "rv0\nMAR/20", "rv1", "rv2", "rv3",
+    #           "rv0\nABR/20", "rv1", "rv2", "rv3",
     #           "rv0\nMAI/20", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nJUN/20", "rv1", "rv2", "rv3", 
+    #           "rv0\nJUN/20", "rv1", "rv2", "rv3",
     #           "rv0\nJUL/20", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nAGO/20", "rv1", "rv2", "rv3", 
+    #           "rv0\nAGO/20", "rv1", "rv2", "rv3",
     #           "rv0\nSET/20", "rv1", "rv2", "rv3",
     #           "rv0\nOUT/20", "rv1", "rv2", "rv3", "rv4",
     #           "rv0\nNOV/20", "rv1", "rv2", "rv3",
@@ -34,12 +34,12 @@ def xticks_graficos() -> Tuple[List[int], List[str]]:
     #           "rv0\nFEV/21", "rv1", "rv2", "rv3"]
     labels = ["rv0\nJAN/20", "", "", "", "",
               "rv0\nFEV/20", "", "", "",
-              "rv0\nMAR/20", "", "", "", 
-              "rv0\nABR/20", "", "", "", 
+              "rv0\nMAR/20", "", "", "",
+              "rv0\nABR/20", "", "", "",
               "rv0\nMAI/20", "", "", "", "",
-              "rv0\nJUN/20", "", "", "", 
+              "rv0\nJUN/20", "", "", "",
               "rv0\nJUL/20", "", "", "", "",
-              "rv0\nAGO/20", "", "", "", 
+              "rv0\nAGO/20", "", "", "",
               "rv0\nSET/20", "", "", "",
               "rv0\nOUT/20", "", "", "", "",
               "rv0\nNOV/20", "", "", "",
@@ -54,7 +54,7 @@ def grafico_cmo_subsistema(casos: List[Caso],
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução do CMO por Submercado",
-                fontsize=14)
+                 fontsize=14)
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='CMO (R$/MWh)')
     # Variáveis para limitar os eixos no futuro
@@ -69,7 +69,7 @@ def grafico_cmo_subsistema(casos: List[Caso],
         suby = s % 2
         # Faz o plot para cada caso
         for c, caso in enumerate(casos):
-        # Recalcula os máximos e mínimos
+            # Recalcula os máximos e mínimos
             x = list(range(caso.n_revs))
             y = caso.cmo_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
@@ -79,7 +79,7 @@ def grafico_cmo_subsistema(casos: List[Caso],
             h = axs[subx, suby].plot(x, y,
                                      linewidth=3,
                                      linestyle="solid",
-                                     color = CORES[c],
+                                     color=CORES[c],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
@@ -113,7 +113,7 @@ def grafico_earm_subsistema(casos: List[Caso],
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução do Armazenamento por Submercado",
-                fontsize=14)
+                 fontsize=14)
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='EARM (% EARMax)')
     # Variáveis para limitar os eixos no futuro
@@ -129,7 +129,7 @@ def grafico_earm_subsistema(casos: List[Caso],
         suby = s % 2
         # Faz o plot para cada caso
         for c, caso in enumerate(casos):
-        # Recalcula os máximos e mínimos
+            # Recalcula os máximos e mínimos
             x = list(range(caso.n_revs + 1))
             y = caso.earm_subsis[sub]
             max_x = max([len(x) - 1, max_x])
@@ -139,7 +139,7 @@ def grafico_earm_subsistema(casos: List[Caso],
             h = axs[subx, suby].plot(x, y,
                                      linewidth=3,
                                      linestyle="solid",
-                                     color = CORES[c],
+                                     color=CORES[c],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
@@ -150,7 +150,7 @@ def grafico_earm_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(min_y[sub], max_y[sub])
+        axs[subx, suby].set_ylim(0, max_y[sub])
         axs[subx, suby].set_xticks(x_ticks + [max_x])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
@@ -173,7 +173,7 @@ def grafico_gt_subsistema(casos: List[Caso],
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução da Geração Térmica por Submercado",
-                fontsize=14)
+                 fontsize=14)
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
@@ -189,7 +189,7 @@ def grafico_gt_subsistema(casos: List[Caso],
         suby = s % 2
         # Faz o plot para cada caso
         for c, caso in enumerate(casos):
-        # Recalcula os máximos e mínimos
+            # Recalcula os máximos e mínimos
             x = list(range(caso.n_revs))
             y = caso.gt_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
@@ -199,7 +199,7 @@ def grafico_gt_subsistema(casos: List[Caso],
             h = axs[subx, suby].plot(x, y,
                                      linewidth=3,
                                      linestyle="solid",
-                                     color = CORES[c],
+                                     color=CORES[c],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
@@ -231,7 +231,7 @@ def grafico_gt_subsistema(casos: List[Caso],
 def grafico_earm_sin(casos: List[Caso],
                      dir_saida: str):
     # Cria o objeto de figura
-    fig = plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(10, 5))
     plt.title("Evolução do Armazenamento para o SIN",
               fontsize=14)
     plt.ylabel('EARM (% EARMax)')
@@ -242,7 +242,7 @@ def grafico_earm_sin(casos: List[Caso],
 
     handlers_legendas = []
     for c, caso in enumerate(casos):
-    # Recalcula os máximos e mínimos
+        # Recalcula os máximos e mínimos
         x = list(range(caso.n_revs + 1))
         y = caso.earm_sin
         max_x = max([len(x) - 1, max_x])
@@ -252,14 +252,14 @@ def grafico_earm_sin(casos: List[Caso],
         h = plt.plot(x, y,
                      linewidth=3,
                      linestyle="solid",
-                     color = CORES[c],
+                     color=CORES[c],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
-    plt.ylim(min_y, max_y)
+    plt.ylim(0, max_y)
     plt.xticks(x_ticks + [max_x],
                [""] + x_labels,
                fontsize=9)
@@ -279,9 +279,9 @@ def grafico_earm_sin(casos: List[Caso],
 
 
 def grafico_gt_sin(casos: List[Caso],
-                            dir_saida: str):
+                   dir_saida: str):
     # Cria o objeto de figura
-    fig = plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(10, 5))
     plt.title("Evolução da Geração Térmica para o SIN",
               fontsize=14)
     plt.ylabel('GT (MWmed)')
@@ -292,7 +292,7 @@ def grafico_gt_sin(casos: List[Caso],
 
     handlers_legendas = []
     for c, caso in enumerate(casos):
-    # Recalcula os máximos e mínimos
+        # Recalcula os máximos e mínimos
         x = list(range(caso.n_revs))
         y = caso.gt_sin[1:]
         max_x = max([len(x) - 1, max_x])
@@ -302,7 +302,7 @@ def grafico_gt_sin(casos: List[Caso],
         h = plt.plot(x, y,
                      linewidth=3,
                      linestyle="solid",
-                     color = CORES[c],
+                     color=CORES[c],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
@@ -328,53 +328,53 @@ def grafico_gt_sin(casos: List[Caso],
 
 def exporta_dados(caso: Caso,
                   caminho: str):
-        """
-        Exporta um conjunto de dados para um formato CSV.
-        """
-        cabecalhos = ["NOME_ARQ", "EARM_SE", "EARM_S",
-                      "EARM_NE", "EARM_N", "EARM_SIN",
-                      "GT_SE", "GT_S", "GT_NE", "GT_N",
-                      "GT_SIN", "CMO_SE", "CMO_S",
-                      "CMO_NE", "CMO_N"]
-        n_dados = caso.n_revs + 1
-        arq = os.path.join(caminho, f"{caso.nome}.csv")
-        with open(arq, "w", newline="") as arqcsv:
-            escritor = csv.writer(arqcsv,
-                                  delimiter=",",
-                                  quotechar="|",
-                                  quoting=csv.QUOTE_MINIMAL)
-            escritor.writerow(cabecalhos)
-            for i in range(n_dados):
-                if i == 0:
-                    nome = "INI"
-                else:
-                    nome = caso.arquivos[i]
-                earm_se = caso.earm_subsis["SE"][i]
-                earm_s = caso.earm_subsis["S"][i]
-                earm_ne = caso.earm_subsis["NE"][i]
-                earm_n  = caso.earm_subsis["N"][i]
-                earm_sin = caso.earm_sin[i]
-                gt_se = caso.gt_subsis["SE"][i]
-                gt_s = caso.gt_subsis["S"][i]
-                gt_ne = caso.gt_subsis["NE"][i]
-                gt_n = caso.gt_subsis["N"][i]
-                gt_sin = caso.gt_sin[i]
-                cmo_se = caso.cmo_subsis["SE"][i]
-                cmo_s = caso.cmo_subsis["S"][i]
-                cmo_ne = caso.cmo_subsis["NE"][i]
-                cmo_n = caso.cmo_subsis["N"][i]
-                escritor.writerow([nome,
-                                   earm_se,
-                                   earm_s,
-                                   earm_ne,
-                                   earm_n,
-                                   earm_sin,
-                                   gt_se,
-                                   gt_s,
-                                   gt_ne,
-                                   gt_n,
-                                   gt_sin,
-                                   cmo_se,
-                                   cmo_s,
-                                   cmo_ne,
-                                   cmo_n])
+    """
+    Exporta um conjunto de dados para um formato CSV.
+    """
+    cabecalhos = ["NOME_ARQ", "EARM_SE", "EARM_S",
+                  "EARM_NE", "EARM_N", "EARM_SIN",
+                  "GT_SE", "GT_S", "GT_NE", "GT_N",
+                  "GT_SIN", "CMO_SE", "CMO_S",
+                  "CMO_NE", "CMO_N"]
+    n_dados = caso.n_revs + 1
+    arq = os.path.join(caminho, f"{caso.nome}.csv")
+    with open(arq, "w", newline="") as arqcsv:
+        escritor = csv.writer(arqcsv,
+                              delimiter=",",
+                              quotechar="|",
+                              quoting=csv.QUOTE_MINIMAL)
+        escritor.writerow(cabecalhos)
+        for i in range(n_dados):
+            if i == 0:
+                nome = "INI"
+            else:
+                nome = caso.arquivos[i]
+            earm_se = caso.earm_subsis["SE"][i]
+            earm_s = caso.earm_subsis["S"][i]
+            earm_ne = caso.earm_subsis["NE"][i]
+            earm_n = caso.earm_subsis["N"][i]
+            earm_sin = caso.earm_sin[i]
+            gt_se = caso.gt_subsis["SE"][i]
+            gt_s = caso.gt_subsis["S"][i]
+            gt_ne = caso.gt_subsis["NE"][i]
+            gt_n = caso.gt_subsis["N"][i]
+            gt_sin = caso.gt_sin[i]
+            cmo_se = caso.cmo_subsis["SE"][i]
+            cmo_s = caso.cmo_subsis["S"][i]
+            cmo_ne = caso.cmo_subsis["NE"][i]
+            cmo_n = caso.cmo_subsis["N"][i]
+            escritor.writerow([nome,
+                               earm_se,
+                               earm_s,
+                               earm_ne,
+                               earm_n,
+                               earm_sin,
+                               gt_se,
+                               gt_s,
+                               gt_ne,
+                               gt_n,
+                               gt_sin,
+                               cmo_se,
+                               cmo_s,
+                               cmo_ne,
+                               cmo_n])

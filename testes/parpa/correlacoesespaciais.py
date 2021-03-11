@@ -37,8 +37,6 @@ class CorrelacoesEspaciais:
             dsv = np.std(self.sinal_a[r], ddof=self.ddof)
             self.sinal_a[r] = (self.sinal_a[r] - med) / dsv
 
-
-
     def _corr_espacial_mensal(self,
                               ree1: int,
                               ree2: int,

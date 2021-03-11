@@ -44,7 +44,7 @@ def main():
     # casos = [smap]
 
     # Gera os gráficos
-    saida = "saidas/"
+    saida = "saidas/combinados"
     # CMO por subsistema
     grafico_cmo_subsistema(casos, saida)
     # EARM por subsistema

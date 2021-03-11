@@ -3,7 +3,6 @@ from idecomp.config import SUBSISTEMAS  # type: ignore
 from idecomp.decomp.modelos.relato import Relato  # type: ignore
 from idecomp.decomp.relato import LeituraRelato  # type: ignore
 from typing import Dict, List
-import numpy as np
 import os
 
 
@@ -77,7 +76,7 @@ class Caso:
                     gt_subsis[s].append(0)
                     cmo_subsis[s].append(0)
                 earm_sin_r = (sum([(earm_subsis[s][-1] / 100) * earmax[s]
-                                for s in SUBSISTEMAS]) / earmax_sin)
+                              for s in SUBSISTEMAS]) / earmax_sin)
                 earm_sin.append(100 * earm_sin_r)
                 gt_sin.append(0)
                 continue
@@ -92,23 +91,12 @@ class Caso:
             gt_sin.append(gt_sin_r)
             # Calcula EARM do SIN
             earm_sin_r = (sum([(earm_subsis[s][-1] / 100) * earmax[s]
-                                for s in SUBSISTEMAS]) / earmax_sin)
+                               for s in SUBSISTEMAS]) / earmax_sin)
             earm_sin.append(100 * earm_sin_r)
             if primeiro:
                 primeiro = False
-        
-        n_revs = len(relatos_pasta) - 1
 
-        # debug_earm_sin = [f"{a};{earm_se:.4f};{earm_s:.4f};{earm_ne:.4f};{earm_n:.4f};{earm_si:.4f};"
-        #                    + f"{gt_se:.4f};{gt_s:.4f};{gt_ne:.4f};{gt_n:.4f};{gt_si:.4f};"
-        #                    + f"{cmo_se:.4f};{cmo_s:.4f};{cmo_ne:.4f};{cmo_n:.4f}" for
-        #                    a, earm_se, earm_s, earm_ne, earm_n, earm_si, gt_se, gt_s, gt_ne, gt_n, gt_si,
-        #                    cmo_se, cmo_s, cmo_ne, cmo_n
-        #                    in zip(relatos_pasta, earm_subsis['SE'], earm_subsis['S'], earm_subsis['NE'], earm_subsis['N'],
-        #                           earm_sin, gt_subsis['SE'], gt_subsis['S'], gt_subsis['NE'], gt_subsis['N'], gt_sin,
-        #                           cmo_subsis['SE'], cmo_subsis['S'], cmo_subsis['NE'], cmo_subsis['N'])]
-        # for d in debug_earm_sin:
-        #     print(d)
+        n_revs = len(relatos_pasta) - 1
 
         return Caso(nome,
                     n_revs,

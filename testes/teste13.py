@@ -100,8 +100,6 @@ for ree in IDS_REES:
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
             facp = yw.facp(p, 12, configs)
-            # print(f"OF = {serie_facp[mes][:6]}")
-            # print(f"ES = {facp[:6]}")
             # Atualiza as variáveis com as máximas diferenças
             for i, c in enumerate(facp):
                 oficial = serie_facp[mes][i]

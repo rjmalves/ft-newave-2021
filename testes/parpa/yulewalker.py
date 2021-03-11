@@ -1,6 +1,6 @@
-import numpy as np
+import numpy as np  # type: ignore
 from copy import deepcopy
-from scipy.linalg import toeplitz
+from scipy.linalg import toeplitz  # type: ignore
 from typing import List, Dict
 
 
@@ -117,7 +117,7 @@ class YuleWalkerPAR:
         return yw
 
     def estima_modelo(self,
-                      ordens: List[float]) -> List[List[float]]:
+                      ordens: List[int]) -> List[List[float]]:
         """
         Realiza a estimação dos coeficientes do modelo PAR(p)
         a partir da resolução do sistema de Yule-Walker.
@@ -185,28 +185,29 @@ class YuleWalkerPARA:
         self.tabela_configs = np.reshape(configs,
                                          (configs.size,))
         self.sinal_bkp = np.zeros((self.n_amostras,
-                                 2 * self.periodos))
+                                   2 * self.periodos))
         self.sinal_n = np.zeros((self.n_amostras,
                                  2 * self.periodos))
         # Lê os sinais brutos e monta o horizonte de 24 meses
         # das configurações respectivas
+        p = self.periodos
         for i, c in enumerate(self.tabela_configs):
-            self.sinal_bkp[:, i] = deepcopy(self.sinal[c][:, i % self.periodos])
+            self.sinal_bkp[:, i] = deepcopy(self.sinal[c][:, i % p])
         # Gera as médias por período
         self.medias = self._medias_per(deepcopy(self.sinal_bkp))
         # Normaliza o sinal
-        for j in range(2 * self.periodos):
+        for j in range(2 * p):
             med = np.mean(self.sinal_bkp[:, j])
             dsv = np.std(self.sinal_bkp[:, j], ddof=self.ddof)
             self.sinal_n[:, j] = (self.sinal_bkp[:, j] - med) / dsv
         # Normaliza as médias
         self.medias_n = np.zeros_like(self.medias)
-        for j in range(self.periodos):
+        for j in range(p):
             med = np.mean(self.medias[1:, j])
             dsv = np.std(self.medias[1:, j], ddof=self.ddof)
             self.medias_n[1:, j] = (self.medias[1:, j] - med) / dsv
 
-    def _medias_per(self ,
+    def _medias_per(self,
                     sinal: np.ndarray) -> np.ndarray:
         """
         Calcula a média dos últimos períodos e retorna a matriz
@@ -224,7 +225,7 @@ class YuleWalkerPARA:
             for j in range(self.periodos):
                 i_sinal = j
                 f_sinal = i_sinal + self.periodos
-                   # Extrai a parcela do ano anterior
+                # Extrai a parcela do ano anterior
                 sinal_anterior = sinal[i - 1,
                                        i_sinal:min([f_sinal, 12])]
                 # Extrai a parcela do ano atual
@@ -276,7 +277,7 @@ class YuleWalkerPARA:
         """
         Realiza o cálculo da covariância entre o sinal defasado no
         tempo com a componente da média anual.
-        
+
         OBS: Pela forma como é calculada a matriz de médias anuais,
         a variável `A(t - 1)`, como no relatório do CEPEL, que da
         origem ao termo `RHO(m - 1)` está associada a um lag `m`
@@ -313,7 +314,6 @@ class YuleWalkerPARA:
                 m = p - i
                 lag = j - i
                 col_p = self.periodos + m
-                # print(f" i = {i} j = {j} COLUNA P = {col_p} COLUNA LAG = {col_p - lag}")
                 mat[i, j] = self._autocov(col_p,
                                           col_p - lag)
                 mat[j, i] = mat[i, j]
@@ -333,7 +333,7 @@ class YuleWalkerPARA:
         """
         Monta e resolve o sistema de equações de Yule-Walker
         a partir de uma matriz extendida, para um certo período
-        `p` e um lag `lag`. 
+        `p` e um lag `lag`.
         """
         ORDEM_MATRIZ = lag + 2
         ind_submat = list(range(1, ORDEM_MATRIZ))
@@ -346,7 +346,7 @@ class YuleWalkerPARA:
         return [c[0] for c in coefs_norm]
 
     def estima_modelo(self,
-                      ordens: List[float],
+                      ordens: List[int],
                       configs: np.ndarray) -> List[List[float]]:
         """
         Realiza a estimação do modelo `PAR-A(p1, p2, ..., pm)`
@@ -365,7 +365,7 @@ class YuleWalkerPARA:
     def facp(self,
              p: int,
              maxlag: int,
-             configs: np.ndarray) -> List[float]:
+             configs: np.ndarray) -> np.ndarray:
         """
         Determina a Função de Autocorrelação Parcial (FACP)
         através do método das correlações condicionadas para
@@ -400,7 +400,7 @@ class YuleWalkerPARA:
         for o in range(1, maxlag):
             ind11 = [0, o]
             ind22 = [[maxlag + 1] if maxlag == 1 else
-                        list(range(1, o)) + [maxlag + 1]][0]
+                     list(range(1, o)) + [maxlag + 1]][0]
 
             if np.array_equal(ind22,
                               np.zeros_like(ind22)):
@@ -419,7 +419,7 @@ class YuleWalkerPARA:
             cond = sig11 - np.matmul(np.matmul(sig12,
                                                np.linalg.inv(sig22)),
                                      sig12.T)
-            
+
             phi = cond[0, 1] / (np.sqrt(cond[0, 0] * cond[1, 1]))
             acps.append(phi)
 
