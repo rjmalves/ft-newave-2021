@@ -1,5 +1,6 @@
 
 import matplotlib.pyplot as plt  # type: ignore
+import csv
 import os
 from typing import List, Tuple
 from caso import Caso  # type: ignore
@@ -70,7 +71,7 @@ def grafico_cmo_subsistema(casos: List[Caso],
         for c, caso in enumerate(casos):
         # Recalcula os máximos e mínimos
             x = list(range(caso.n_revs))
-            y = caso.cmo_subsis[sub]
+            y = caso.cmo_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
@@ -129,7 +130,7 @@ def grafico_earm_subsistema(casos: List[Caso],
         # Faz o plot para cada caso
         for c, caso in enumerate(casos):
         # Recalcula os máximos e mínimos
-            x = list(range(caso.n_revs))
+            x = list(range(caso.n_revs + 1))
             y = caso.earm_subsis[sub]
             max_x = max([len(x) - 1, max_x])
             max_y[sub] = max([max_y[sub]] + list(y))
@@ -150,8 +151,8 @@ def grafico_earm_subsistema(casos: List[Caso],
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
         axs[subx, suby].set_ylim(min_y[sub], max_y[sub])
-        axs[subx, suby].set_xticks(x_ticks)
-        axs[subx, suby].set_xticklabels(x_labels,
+        axs[subx, suby].set_xticks(x_ticks + [max_x])
+        axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
     plt.tight_layout()
     fig.legend(handlers_legendas,
@@ -190,7 +191,7 @@ def grafico_gt_subsistema(casos: List[Caso],
         for c, caso in enumerate(casos):
         # Recalcula os máximos e mínimos
             x = list(range(caso.n_revs))
-            y = caso.gt_subsis[sub]
+            y = caso.gt_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
             max_y[sub] = max([max_y[sub]] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
@@ -242,7 +243,7 @@ def grafico_earm_sin(casos: List[Caso],
     handlers_legendas = []
     for c, caso in enumerate(casos):
     # Recalcula os máximos e mínimos
-        x = list(range(caso.n_revs))
+        x = list(range(caso.n_revs + 1))
         y = caso.earm_sin
         max_x = max([len(x) - 1, max_x])
         max_y = max([max_y] + list(y))
@@ -259,7 +260,9 @@ def grafico_earm_sin(casos: List[Caso],
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
     plt.ylim(min_y, max_y)
-    plt.xticks(x_ticks, x_labels, fontsize=9)
+    plt.xticks(x_ticks + [max_x],
+               [""] + x_labels,
+               fontsize=9)
     plt.tight_layout()
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
@@ -291,7 +294,7 @@ def grafico_gt_sin(casos: List[Caso],
     for c, caso in enumerate(casos):
     # Recalcula os máximos e mínimos
         x = list(range(caso.n_revs))
-        y = caso.gt_sin
+        y = caso.gt_sin[1:]
         max_x = max([len(x) - 1, max_x])
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
@@ -321,3 +324,57 @@ def grafico_gt_sin(casos: List[Caso],
     plt.savefig(os.path.join(dir_saida,
                              "backtest_gt_sin.png"))
     plt.close()
+
+
+def exporta_dados(caso: Caso,
+                  caminho: str):
+        """
+        Exporta um conjunto de dados para um formato CSV.
+        """
+        cabecalhos = ["NOME_ARQ", "EARM_SE", "EARM_S",
+                      "EARM_NE", "EARM_N", "EARM_SIN",
+                      "GT_SE", "GT_S", "GT_NE", "GT_N",
+                      "GT_SIN", "CMO_SE", "CMO_S",
+                      "CMO_NE", "CMO_N"]
+        n_dados = caso.n_revs + 1
+        arq = os.path.join(caminho, f"{caso.nome}.csv")
+        with open(arq, "w", newline="") as arqcsv:
+            escritor = csv.writer(arqcsv,
+                                  delimiter=",",
+                                  quotechar="|",
+                                  quoting=csv.QUOTE_MINIMAL)
+            escritor.writerow(cabecalhos)
+            for i in range(n_dados):
+                if i == 0:
+                    nome = "INI"
+                else:
+                    nome = caso.arquivos[i]
+                earm_se = caso.earm_subsis["SE"][i]
+                earm_s = caso.earm_subsis["S"][i]
+                earm_ne = caso.earm_subsis["NE"][i]
+                earm_n  = caso.earm_subsis["N"][i]
+                earm_sin = caso.earm_sin[i]
+                gt_se = caso.gt_subsis["SE"][i]
+                gt_s = caso.gt_subsis["S"][i]
+                gt_ne = caso.gt_subsis["NE"][i]
+                gt_n = caso.gt_subsis["N"][i]
+                gt_sin = caso.gt_sin[i]
+                cmo_se = caso.cmo_subsis["SE"][i]
+                cmo_s = caso.cmo_subsis["S"][i]
+                cmo_ne = caso.cmo_subsis["NE"][i]
+                cmo_n = caso.cmo_subsis["N"][i]
+                escritor.writerow([nome,
+                                   earm_se,
+                                   earm_s,
+                                   earm_ne,
+                                   earm_n,
+                                   earm_sin,
+                                   gt_se,
+                                   gt_s,
+                                   gt_ne,
+                                   gt_n,
+                                   gt_sin,
+                                   cmo_se,
+                                   cmo_s,
+                                   cmo_ne,
+                                   cmo_n])

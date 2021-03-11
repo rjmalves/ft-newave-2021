@@ -4,6 +4,7 @@ from graficos import grafico_earm_sin  # type: ignore
 from graficos import grafico_earm_subsistema  # type: ignore
 from graficos import grafico_gt_sin  # type: ignore
 from graficos import grafico_gt_subsistema  # type: ignore
+from graficos import exporta_dados  # type: ignore
 
 
 def main():
@@ -44,16 +45,20 @@ def main():
 
     # Gera os gráficos
     saida = "saidas/"
-    # # CMO por subsistema
+    # CMO por subsistema
     grafico_cmo_subsistema(casos, saida)
-    # # EARM por subsistema
+    # EARM por subsistema
     grafico_earm_subsistema(casos, saida)
-    # # GT por subsistema
+    # GT por subsistema
     grafico_gt_subsistema(casos, saida)
     # EARM para SIN
     grafico_earm_sin(casos, saida)
     # GT para SIN
     grafico_gt_sin(casos, saida)
+
+    # Exporta os dados
+    for c in casos:
+        exporta_dados(c, saida)
 
 
 if __name__ == "__main__":
