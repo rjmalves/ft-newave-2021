@@ -3,7 +3,7 @@
 
 # TESTE 25
 #
-# Processar um caso com restrição elétricae verificar a
+# Processar um caso com restrição elétrica e verificar a
 # consideração desta restrição no período pós quando se
 # considera a opção ir direto para simulação final.
 

@@ -150,7 +150,7 @@ def grafico_earm_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(0, max_y[sub])
+        axs[subx, suby].set_ylim(0, 100)
         axs[subx, suby].set_xticks(x_ticks + [max_x])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
@@ -210,7 +210,8 @@ def grafico_gt_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(min_y[sub], max_y[sub])
+        axs[subx, suby].set_ylim(0, max([max_y[s]
+                                         for s in SUBSISTEMAS]))
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
@@ -259,7 +260,7 @@ def grafico_earm_sin(casos: List[Caso],
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
-    plt.ylim(0, max_y)
+    plt.ylim(0, 100)
     plt.xticks(x_ticks + [max_x],
                [""] + x_labels,
                fontsize=9)
@@ -326,6 +327,66 @@ def grafico_gt_sin(casos: List[Caso],
     plt.close()
 
 
+def grafico_deficit_subsistema(casos: List[Caso],
+                               dir_saida: str):
+    # Cria o objeto de figura
+    fig, axs = plt.subplots(2, 2, figsize=(16, 9))
+    fig.suptitle("Déficit por Submercado",
+                 fontsize=14)
+    for ax in axs.flat:
+        ax.set(xlabel='', ylabel='Deficit (MWmed)')
+    # Variáveis para limitar os eixos no futuro
+    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    min_y = {s: 1e4 for s in SUBSISTEMAS}
+    max_x = 0
+
+    handlers_legendas = []
+    # Desenha as linhas
+    for s, sub in enumerate(SUBSISTEMAS):
+        # Decide qual subplot usar
+        subx = int(s / 2)
+        suby = s % 2
+        # Faz o plot para cada caso
+        for c, caso in enumerate(casos):
+            # Recalcula os máximos e mínimos
+            x = list(range(caso.n_revs + 1))
+            y = caso.earm_subsis[sub]
+            max_x = max([len(x) - 1, max_x])
+            max_y[sub] = max([max_y[sub]] + list(y))
+            min_y[sub] = min([min_y[sub]] + list(y))
+            # Faz o plot
+            h = axs[subx, suby].plot(x, y,
+                                     linewidth=3,
+                                     linestyle="solid",
+                                     color=CORES[c],
+                                     alpha=0.8,
+                                     label=caso.nome)
+            handlers_legendas.append(h)
+        axs[subx, suby].set_title(sub)
+    # Adiciona a legenda e limita os eixos
+    x_ticks, x_labels = xticks_graficos()
+    for s, sub in enumerate(SUBSISTEMAS):
+        subx = int(s / 2)
+        suby = s % 2
+        axs[subx, suby].set_xlim(0, max_x)
+        axs[subx, suby].set_ylim(0, 100)
+        axs[subx, suby].set_xticks(x_ticks + [max_x])
+        axs[subx, suby].set_xticklabels([""] + x_labels,
+                                        fontsize=9)
+    plt.tight_layout()
+    fig.legend(handlers_legendas,
+               labels=[c.nome for c in casos],
+               loc="lower center",
+               borderaxespad=0.2,
+               ncol=len(casos))
+
+    # Salva o arquivo de saída
+    plt.subplots_adjust(bottom=0.085)
+    plt.savefig(os.path.join(dir_saida,
+                             "backtest_earm_subsis.png"))
+    plt.close()
+
+
 def exporta_dados(caso: Caso,
                   caminho: str):
     """
@@ -334,8 +395,10 @@ def exporta_dados(caso: Caso,
     cabecalhos = ["NOME_ARQ", "EARM_SE", "EARM_S",
                   "EARM_NE", "EARM_N", "EARM_SIN",
                   "GT_SE", "GT_S", "GT_NE", "GT_N",
-                  "GT_SIN", "CMO_SE", "CMO_S",
-                  "CMO_NE", "CMO_N"]
+                  "GT_SIN", "GH_SE", "GH_S", "GH_NE",
+                  "GH_N", "GH_SIN", "CMO_SE", "CMO_S",
+                  "CMO_NE", "CMO_N", "DEF_SE", "DEF_S",
+                  "DEF_NE", "DEF_N"]
     n_dados = caso.n_revs + 1
     arq = os.path.join(caminho, f"{caso.nome}.csv")
     with open(arq, "w", newline="") as arqcsv:
@@ -359,10 +422,19 @@ def exporta_dados(caso: Caso,
             gt_ne = caso.gt_subsis["NE"][i]
             gt_n = caso.gt_subsis["N"][i]
             gt_sin = caso.gt_sin[i]
+            ghid_se = caso.ghid_subsis["SE"][i]
+            ghid_s = caso.ghid_subsis["S"][i]
+            ghid_ne = caso.ghid_subsis["NE"][i]
+            ghid_n = caso.ghid_subsis["N"][i]
+            ghid_sin = caso.ghid_sin[i]
             cmo_se = caso.cmo_subsis["SE"][i]
             cmo_s = caso.cmo_subsis["S"][i]
             cmo_ne = caso.cmo_subsis["NE"][i]
             cmo_n = caso.cmo_subsis["N"][i]
+            def_se = caso.def_subsis["SE"][i]
+            def_s = caso.def_subsis["S"][i]
+            def_ne = caso.def_subsis["NE"][i]
+            def_n = caso.def_subsis["N"][i]
             escritor.writerow([nome,
                                earm_se,
                                earm_s,
@@ -374,7 +446,16 @@ def exporta_dados(caso: Caso,
                                gt_ne,
                                gt_n,
                                gt_sin,
+                               ghid_se,
+                               ghid_s,
+                               ghid_ne,
+                               ghid_n,
+                               ghid_sin,
                                cmo_se,
                                cmo_s,
                                cmo_ne,
-                               cmo_n])
+                               cmo_n,
+                               def_se,
+                               def_s,
+                               def_ne,
+                               def_n])

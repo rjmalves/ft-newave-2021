@@ -17,7 +17,10 @@ class Caso:
                  earm_subsis: Dict[str, List[float]],
                  earm_sin: List[float],
                  gt_subsis: Dict[str, List[float]],
-                 gt_sin: List[float]
+                 gt_sin: List[float],
+                 ghid_subsis: Dict[str, List[float]],
+                 ghid_sin: List[float],
+                 def_subsis: Dict[str, List[float]],
                  ):
         self.nome = nome
         self.n_revs = n_revs
@@ -27,6 +30,9 @@ class Caso:
         self.earm_sin = earm_sin
         self.gt_subsis = gt_subsis
         self.gt_sin = gt_sin
+        self.ghid_subsis = ghid_subsis
+        self.ghid_sin = ghid_sin
+        self.def_subsis = def_subsis
 
     @classmethod
     def constroi_caso_de_pasta(cls,
@@ -62,8 +68,13 @@ class Caso:
         gt_sin: List[float] = []
         earm_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
         earm_sin: List[float] = []
+        ghid_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
+        ghid_sin: List[float] = []
+        def_subsis: Dict[str, List[float]] = {s: [] for s in SUBSISTEMAS}
         for a in relatos_pasta:
             re = relatos[a]
+            ghids = re.geracao_hidraulica_subsistema
+            defs = re.deficit_subsistema
             cmos = re.cmo_medio_subsistema
             gts = re.geracao_termica_subsistema
             earmax = re.armazenamento_maximo_subsistema
@@ -75,20 +86,28 @@ class Caso:
                     earm_subsis[s].append(earms)
                     gt_subsis[s].append(0)
                     cmo_subsis[s].append(0)
+                    ghid_subsis[s].append(0)
+                    def_subsis[s].append(0)
                 earm_sin_r = (sum([(earm_subsis[s][-1] / 100) * earmax[s]
                               for s in SUBSISTEMAS]) / earmax_sin)
                 earm_sin.append(100 * earm_sin_r)
                 gt_sin.append(0)
+                ghid_sin.append(0)
                 continue
             # Senão, pega todas as informações
             for s in SUBSISTEMAS:
                 cmo_subsis[s].append(cmos[s][0])
                 gt_subsis[s].append(gts[s][0])
+                ghid_subsis[s].append(ghids[s][0])
+                def_subsis[s].append(defs[s][0])
                 earms = re.energia_armazenada_subsistema[s][0]
                 earm_subsis[s].append(earms)
             # Calcula GT do SIN
             gt_sin_r = sum([gt_subsis[s][-1] for s in SUBSISTEMAS])
             gt_sin.append(gt_sin_r)
+            # Calcula GHID do SIN
+            gh_sin_r = sum([ghid_subsis[s][-1] for s in SUBSISTEMAS])
+            ghid_sin.append(gh_sin_r)
             # Calcula EARM do SIN
             earm_sin_r = (sum([(earm_subsis[s][-1] / 100) * earmax[s]
                                for s in SUBSISTEMAS]) / earmax_sin)
@@ -105,4 +124,7 @@ class Caso:
                     earm_subsis,
                     earm_sin,
                     gt_subsis,
-                    gt_sin)
+                    gt_sin,
+                    ghid_subsis,
+                    ghid_sin,
+                    def_subsis)
