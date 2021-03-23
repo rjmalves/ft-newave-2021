@@ -157,7 +157,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         # Faz o plot para cada caso
         for c, caso in enumerate(casos):
             # Recalcula os máximos e mínimos
-            x = list(range(caso.n_revs))
+            x = list(range(caso.n_revs+1))
             y = caso.earm_subsis[sub]
             max_x = max([len(x) - 1, max_x])
             max_y = max([max_y] + list(y))
@@ -189,8 +189,8 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
         axs[subx, suby].set_ylim(min_y, max_y)
-        axs[subx, suby].set_xticks(x_ticks)
-        axs[subx, suby].set_xticklabels(x_labels,
+        axs[subx, suby].set_xticks(x_ticks + [len(x_ticks)])
+        axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
         twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
@@ -289,7 +289,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
 def grafico_earm_sin_dif(casos: List[Caso],
                          dir_saida: str):
     # Cria o objeto de figura
-    fig, axs = plt.figure(figsize=(10, 5))
+    fig, axs = plt.subplots(figsize=(10, 5))
     plt.title("Evolução do Armazenamento para o SIN",
               fontsize=14)
     plt.ylabel('EARM (% EARMax)')
@@ -315,16 +315,23 @@ def grafico_earm_sin_dif(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
+    plt.legend(handlers_legendas,
+               labels=[c.nome for c in casos],
+               bbox_to_anchor=(0.462, -0.18),
+               loc="lower center",
+               borderaxespad=0,
+               ncol=len(casos),
+               fontsize=9)
     # Calcula as diferenças
     difs = (np.array(casos[1].earm_sin) -
             np.array(casos[0].earm_sin))
-    max_y_dif = max([abs(max_y_dif)] + list(difs))
+    max_y_dif = max(list(difs))
     # Desenha as diferenças
     twin = axs.twinx()
-    axs.stem(x, difs,
-             linefmt='grey',
-             markerfmt='none',
-             basefmt='none')
+    twin.stem(x, difs,
+              linefmt='grey',
+              markerfmt='none',
+              basefmt='none')
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
@@ -336,13 +343,6 @@ def grafico_earm_sin_dif(casos: List[Caso],
     plt.tight_layout()
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
-    plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
-               bbox_to_anchor=(0.462, -0.18),
-               loc="lower center",
-               borderaxespad=0,
-               ncol=len(casos),
-               fontsize=9)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_earm_sin_dif.png"))
     plt.close()
@@ -351,7 +351,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
 def grafico_gt_sin_dif(casos: List[Caso],
                        dir_saida: str):
     # Cria o objeto de figura
-    fig, axs = plt.figure(figsize=(10, 5))
+    fig, axs = plt.subplots(figsize=(10, 5))
     plt.title("Evolução da Geração Térmica para o SIN",
               fontsize=14)
     plt.ylabel('GT (MWmed)')
@@ -377,24 +377,6 @@ def grafico_gt_sin_dif(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
-    # Calcula as diferenças
-    difs = (np.array(casos[1].gt_sin[1:]) -
-            np.array(casos[0].gt_sin[1:]))
-    max_y_dif = max([abs(max_y_dif)] + list(difs))
-    # Desenha as diferenças
-    twin = axs.twinx()
-    axs.stem(x, difs,
-             linefmt='grey',
-             markerfmt='none',
-             basefmt='none')
-    # Adiciona a legenda e limita os eixos
-    x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(min_y, max_y)
-    plt.xticks(x_ticks, x_labels, fontsize=9)
-    plt.tight_layout()
-    # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
@@ -402,6 +384,26 @@ def grafico_gt_sin_dif(casos: List[Caso],
                borderaxespad=0,
                ncol=len(casos),
                fontsize=9)
+    # Calcula as diferenças
+    difs = (np.array(casos[1].gt_sin[1:]) -
+            np.array(casos[0].gt_sin[1:]))
+    max_y_dif = max([abs(max_y_dif)] + list(difs))
+    # Desenha as diferenças
+    twin = axs.twinx()
+    twin.stem(x, difs,
+              linefmt='grey',
+              markerfmt='none',
+              basefmt='none')
+    # Adiciona a legenda e limita os eixos
+    x_ticks, x_labels = xticks_graficos()
+    plt.xlim(0, max_x)
+    plt.ylim(min_y, max_y)
+    twin.set_ylim(-max_y_dif, max_y_dif)
+    plt.xticks(x_ticks, x_labels,
+               fontsize=9)
+    plt.tight_layout()
+    # Salva o arquivo de saída
+    plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_gt_sin_dif.png"))
     plt.close()
