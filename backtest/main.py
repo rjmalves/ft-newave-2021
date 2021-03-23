@@ -9,6 +9,8 @@ from graficos import exporta_dados  # type: ignore
 from graficos_compara import grafico_cmo_subsistema_dif  # type: ignore
 from graficos_compara import grafico_earm_subsistema_dif  # type: ignore
 from graficos_compara import grafico_gt_subsistema_dif  # type: ignore
+from graficos_compara import grafico_earm_sin_dif  # type: ignore
+from graficos_compara import grafico_gt_sin_dif  # type: ignore
 # TODO - 
 # Fazer gráficos cabeleira para o teste 20
 # Trocar os diretórios de entrada do backtest para variáveis de ambiente (.env.example)
@@ -68,11 +70,12 @@ def main():
 
     saida_cmp = "saidas/compara"
 
+    # Gera os gráficos de comparação
     grafico_cmo_subsistema_dif(casos_cmp, saida_cmp)
     grafico_earm_subsistema_dif(casos_cmp, saida_cmp)
     grafico_gt_subsistema_dif(casos_cmp, saida_cmp)
-    # Gera os gráficos de comparação
-
+    grafico_earm_sin_dif(casos_cmp, saida_cmp)
+    grafico_gt_sin_dif(casos_cmp, saida_cmp)
     # Exporta os dados
     for c in casos:
         exporta_dados(c, saida)
