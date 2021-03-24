@@ -29,14 +29,18 @@ def main():
     # Constroi os casos
     oficial = Caso.constroi_caso_de_pasta(dir_oficial,
                                           "Oficial")
+    nome = "$\\alpha$ = 50%, $\\lambda$ = 25%"
     cvar_50x25 = Caso.constroi_caso_de_pasta(dir_cvar_50x25,
-                                             "$\\alpha$ = 50%, $\\lambda$ = 25%")
+                                             nome)
+    nome = "$\\alpha$ = 50%, $\\lambda$ = 35%"
     cvar_50x35 = Caso.constroi_caso_de_pasta(dir_cvar_50x35,
-                                             "$\\alpha$ = 50%, $\\lambda$ = 35%")
+                                             nome)
+    nome = "$\\alpha$ = 50%, $\\lambda$ = 50%"
     cvar_50x50 = Caso.constroi_caso_de_pasta(dir_cvar_50x50,
-                                             "$\\alpha$ = 50%, $\\lambda$ = 50%")
+                                             nome)
+    nome = "$\\alpha$ = 25%, $\\lambda$ = 50%"
     cvar_25x50 = Caso.constroi_caso_de_pasta(dir_cvar_25x50,
-                                             "$\\alpha$ = 25%, $\\lambda$ = 50%")
+                                             nome)
 
 
     casos = [oficial,
@@ -55,18 +59,17 @@ def main():
 
     # Gera os gráficos
     # CMO por subsistema
-    # grafico_cmo_subsistema(casos, saida)
-    # # EARM por subsistema
-    # grafico_earm_subsistema(casos, saida)
-    # # GT por subsistema
-    # grafico_gt_subsistema(casos, saida)
-    # # Déficit por subsistema
-    # grafico_deficit_subsistema(casos, saida)
-    # # EARM para SIN
-    # grafico_earm_sin(casos, saida)
-    # # GT para SIN
-    # grafico_gt_sin(casos, saida)
-
+    grafico_cmo_subsistema(casos, saida)
+    # EARM por subsistema
+    grafico_earm_subsistema(casos, saida)
+    # GT por subsistema
+    grafico_gt_subsistema(casos, saida)
+    # Déficit por subsistema
+    grafico_deficit_subsistema(casos, saida)
+    # EARM para SIN
+    grafico_earm_sin(casos, saida)
+    # GT para SIN
+    grafico_gt_sin(casos, saida)
 
     casos_cmp = [
                  oficial,
