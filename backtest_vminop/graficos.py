@@ -110,6 +110,7 @@ def grafico_earm_subsistema(casos: List[Caso],
     max_x = 0
 
     handlers_legendas = []
+    vminp = {"SE": 10, "S": 30, "NE": 22.5, "N": 10.7}
     # Desenha as linhas
     for s, sub in enumerate(SUBSISTEMAS):
         # Decide qual subplot usar
@@ -132,6 +133,16 @@ def grafico_earm_subsistema(casos: List[Caso],
                                      label=caso.nome)
             handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
+        # Faz o plot do vminp para o subsistema
+        x = range(max_x)
+        y = [vminp[sub]] * len(x)
+        h = axs[subx, suby].plot(x, y,
+                             linewidth=2,
+                             linestyle="dashed",
+                             color="red",
+                             alpha=0.65,
+                             label="VminOP")
+        handlers_legendas.append(h)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     for s, sub in enumerate(SUBSISTEMAS):
@@ -295,6 +306,15 @@ def grafico_gt_sin(casos: List[Caso],
                      alpha=0.65,
                      label=caso.nome)
         handlers_legendas.append(h)
+    # Faz o plot da meta GT para o subsistema
+    x = range(max_x + 1)
+    y = [15000] * len(x)
+    h = plt.plot(x, y,
+                 linewidth=2,
+                 linestyle="dashed",
+                 color="red",
+                 alpha=0.65,
+                 label="Meta CMSE")
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)

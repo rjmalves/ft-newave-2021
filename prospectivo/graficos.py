@@ -2,56 +2,31 @@
 import matplotlib.pyplot as plt  # type: ignore
 import csv
 import os
-import numpy as np
 from typing import List, Tuple
 from caso import Caso  # type: ignore
 from caso import SUBSISTEMAS  # type: ignore
 
 CORES = ["black",
-         "deepskyblue",
-         "springgreen",
-         "gold",
-         "lightsalmon",
          "orangered"]
 
 
 def xticks_graficos() -> Tuple[List[int], List[str]]:
     """
     """
-    ticks = list(range(61))
-    # labels = ["rv0\nJAN/20", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nFEV/20", "rv1", "rv2", "rv3",
-    #           "rv0\nMAR/20", "rv1", "rv2", "rv3",
-    #           "rv0\nABR/20", "rv1", "rv2", "rv3",
-    #           "rv0\nMAI/20", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nJUN/20", "rv1", "rv2", "rv3",
-    #           "rv0\nJUL/20", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nAGO/20", "rv1", "rv2", "rv3",
-    #           "rv0\nSET/20", "rv1", "rv2", "rv3",
-    #           "rv0\nOUT/20", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nNOV/20", "rv1", "rv2", "rv3",
-    #           "rv0\nDEZ/20", "rv1", "rv2", "rv3",
-    #           "rv0\nJAN/21", "rv1", "rv2", "rv3", "rv4",
-    #           "rv0\nFEV/21", "rv1", "rv2", "rv3"]
-    labels = ["rv0\nJAN/20", "", "", "", "",
-              "rv0\nFEV/20", "", "", "",
-              "rv0\nMAR/20", "", "", "",
-              "rv0\nABR/20", "", "", "",
-              "rv0\nMAI/20", "", "", "", "",
-              "rv0\nJUN/20", "", "", "",
-              "rv0\nJUL/20", "", "", "", "",
-              "rv0\nAGO/20", "", "", "",
-              "rv0\nSET/20", "", "", "",
-              "rv0\nOUT/20", "", "", "", "",
-              "rv0\nNOV/20", "", "", "",
-              "rv0\nDEZ/20", "", "", "",
-              "rv0\nJAN/21", "", "", "", "",
-              "rv0\nFEV/21", "", "", ""]
+    ticks = list(range(7))
+    labels = ["MAI/21",
+              "JUN/21",
+              "JUL/21",
+              "AGO/21",
+              "SET/21",
+              "OUT/21",
+              "NOV/21"
+              ]
     return ticks, labels
 
 
-def grafico_cmo_subsistema_dif(casos: List[Caso],
-                               dir_saida: str):
+def grafico_cmo_subsistema(casos: List[Caso],
+                           dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução do CMO por Submercado",
@@ -61,16 +36,8 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
     min_y = 1e4
-    max_y_dif = 0.0
     max_x = 0
     handlers_legendas = []
-    # Extrai os handlers dos eixos secundários
-    twins = {0: {}, 1: {}}
-    for s, sub in enumerate(SUBSISTEMAS):
-        subx = int(s / 2)
-        suby = s % 2
-        twin = axs[subx, suby].twinx()
-        twins[subx][suby] = twin
     # Desenha as linhas
     for s, sub in enumerate(SUBSISTEMAS):
         # Decide qual subplot usar
@@ -92,17 +59,6 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
-        # Calcula as diferenças
-        difs = (np.array(casos[1].cmo_subsis[sub][1:]) -
-                np.array(casos[0].cmo_subsis[sub][1:]))
-        # Faz o plot das diferenças
-        max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
-                                   linefmt='grey',
-                                   markerfmt='none',
-                                   basefmt='none',
-                                   label="Diferença")
-        handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
@@ -114,7 +70,6 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
-        twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
                labels=[c.nome for c in casos],
@@ -125,11 +80,12 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.085)
     plt.savefig(os.path.join(dir_saida,
-                             "backtest_cmo_dif.png"))
+                             "prospec_cmo.png"))
     plt.close()
 
-def grafico_earm_subsistema_dif(casos: List[Caso],
-                               dir_saida: str):
+
+def grafico_earm_subsistema(casos: List[Caso],
+                            dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução do Armazenamento por Submercado",
@@ -137,19 +93,11 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='EARM (% EARMax)')
     # Variáveis para limitar os eixos no futuro
-    max_y = 0.0
-    min_y = 1e4
-    max_y_dif = 0.0
+    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
+
     handlers_legendas = []
-    # Extrai os handlers dos eixos secundários
-    twins = {0: {}, 1: {}}
-    for s, sub in enumerate(SUBSISTEMAS):
-        subx = int(s / 2)
-        suby = s % 2
-        twin = axs[subx, suby].twinx()
-        twins[subx][suby] = twin
-    vminp = {"SE": 20, "S": 30, "NE": 23.5, "N": 20.8}
     # Desenha as linhas
     for s, sub in enumerate(SUBSISTEMAS):
         # Decide qual subplot usar
@@ -158,11 +106,11 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         # Faz o plot para cada caso
         for c, caso in enumerate(casos):
             # Recalcula os máximos e mínimos
-            x = list(range(caso.n_revs+1))
+            x = list(range(caso.n_revs + 1))
             y = caso.earm_subsis[sub]
             max_x = max([len(x) - 1, max_x])
-            max_y = max([max_y] + list(y))
-            min_y = min([min_y] + list(y))
+            max_y[sub] = max([max_y[sub]] + list(y))
+            min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
                                      linewidth=3,
@@ -171,38 +119,17 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
-        # Calcula as diferenças
-        difs = (np.array(casos[1].earm_subsis[sub]) -
-                np.array(casos[0].earm_subsis[sub]))
-        # Faz o plot das diferenças
-        max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
-                                   linefmt='grey',
-                                   markerfmt='none',
-                                   basefmt='none',
-                                   label="Diferença")
-        handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
-        # Faz o plot do vminp para o subsistema
-        x = range(max_x + 1)
-        y = [vminp[sub]] * len(x)
-        h = axs[subx, suby].plot(x, y,
-                             linewidth=2,
-                             linestyle="dashed",
-                             color="red",
-                             alpha=0.65,
-                             label="VminOP")
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     for s, sub in enumerate(SUBSISTEMAS):
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(min_y, max_y)
-        axs[subx, suby].set_xticks(x_ticks + [len(x_ticks)])
+        axs[subx, suby].set_ylim(0, 100)
+        axs[subx, suby].set_xticks(x_ticks + [max_x])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
-        twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
                labels=[c.nome for c in casos],
@@ -213,12 +140,12 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.085)
     plt.savefig(os.path.join(dir_saida,
-                             "backtest_earm_dif.png"))
+                             "prospec_earm_subsis.png"))
     plt.close()
 
 
-def grafico_gt_subsistema_dif(casos: List[Caso],
-                               dir_saida: str):
+def grafico_gt_subsistema(casos: List[Caso],
+                          dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução da Geração Térmica por Submercado",
@@ -226,18 +153,11 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
-    max_y = 0.0
-    min_y = 1e4
-    max_y_dif = 0.0
+    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
+
     handlers_legendas = []
-    # Extrai os handlers dos eixos secundários
-    twins = {0: {}, 1: {}}
-    for s, sub in enumerate(SUBSISTEMAS):
-        subx = int(s / 2)
-        suby = s % 2
-        twin = axs[subx, suby].twinx()
-        twins[subx][suby] = twin
     # Desenha as linhas
     for s, sub in enumerate(SUBSISTEMAS):
         # Decide qual subplot usar
@@ -249,8 +169,8 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
             x = list(range(caso.n_revs))
             y = caso.gt_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
-            max_y = max([max_y] + list(y))
-            min_y = min([min_y] + list(y))
+            max_y[sub] = max([max_y[sub]] + list(y))
+            min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
                                      linewidth=3,
@@ -259,17 +179,6 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
-        # Calcula as diferenças
-        difs = (np.array(casos[1].gt_subsis[sub][1:]) -
-                np.array(casos[0].gt_subsis[sub][1:]))
-        # Faz o plot das diferenças
-        max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
-                                   linefmt='grey',
-                                   markerfmt='none',
-                                   basefmt='none',
-                                   label="Diferença")
-        handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
@@ -277,11 +186,11 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(min_y, max_y)
+        axs[subx, suby].set_ylim(0, max([max_y[s]
+                                         for s in SUBSISTEMAS]))
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
-        twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
                labels=[c.nome for c in casos],
@@ -292,20 +201,19 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.085)
     plt.savefig(os.path.join(dir_saida,
-                             "backtest_gt_dif.png"))
+                             "prospec_gt_subsis.png"))
     plt.close()
 
 
-def grafico_earm_sin_dif(casos: List[Caso],
-                         dir_saida: str):
+def grafico_earm_sin(casos: List[Caso],
+                     dir_saida: str):
     # Cria o objeto de figura
-    fig, axs = plt.subplots(figsize=(10, 5))
+    plt.figure(figsize=(10, 5))
     plt.title("Evolução do Armazenamento para o SIN",
               fontsize=14)
     plt.ylabel('EARM (% EARMax)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
-    max_y_dif = 0.0
     min_y = 1e4
     max_x = 0
 
@@ -325,6 +233,16 @@ def grafico_earm_sin_dif(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
+    # Adiciona a legenda e limita os eixos
+    x_ticks, x_labels = xticks_graficos()
+    plt.xlim(0, max_x)
+    plt.ylim(0, 100)
+    plt.xticks(x_ticks + [max_x],
+               [""] + x_labels,
+               fontsize=9)
+    plt.tight_layout()
+    # Salva o arquivo de saída
+    plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
@@ -332,42 +250,20 @@ def grafico_earm_sin_dif(casos: List[Caso],
                borderaxespad=0,
                ncol=len(casos),
                fontsize=9)
-    # Calcula as diferenças
-    difs = (np.array(casos[1].earm_sin) -
-            np.array(casos[0].earm_sin))
-    max_y_dif = max(list(difs))
-    # Desenha as diferenças
-    twin = axs.twinx()
-    twin.stem(x, difs,
-              linefmt='grey',
-              markerfmt='none',
-              basefmt='none')
-    # Adiciona a legenda e limita os eixos
-    x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(0, 100)
-    twin.set_ylim(-max_y_dif, max_y_dif)
-    plt.xticks(x_ticks + [max_x],
-               [""] + x_labels,
-               fontsize=9)
-    plt.tight_layout()
-    # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(dir_saida,
-                             "backtest_earm_sin_dif.png"))
+                             "prospec_earm_sin.png"))
     plt.close()
 
 
-def grafico_gt_sin_dif(casos: List[Caso],
-                       dir_saida: str):
+def grafico_gt_sin(casos: List[Caso],
+                   dir_saida: str):
     # Cria o objeto de figura
-    fig, axs = plt.subplots(figsize=(10, 5))
+    plt.figure(figsize=(10, 5))
     plt.title("Evolução da Geração Térmica para o SIN",
               fontsize=14)
     plt.ylabel('GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
-    max_y_dif = 0.0
     min_y = 1e4
     max_x = 0
 
@@ -387,7 +283,14 @@ def grafico_gt_sin_dif(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
-    
+    # Adiciona a legenda e limita os eixos
+    x_ticks, x_labels = xticks_graficos()
+    plt.xlim(0, max_x)
+    plt.ylim(min_y, max_y)
+    plt.xticks(x_ticks, x_labels, fontsize=9)
+    plt.tight_layout()
+    # Salva o arquivo de saída
+    plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
@@ -395,37 +298,68 @@ def grafico_gt_sin_dif(casos: List[Caso],
                borderaxespad=0,
                ncol=len(casos),
                fontsize=9)
-    # Calcula as diferenças
-    difs = (np.array(casos[1].gt_sin[1:]) -
-            np.array(casos[0].gt_sin[1:]))
-    max_y_dif = max([abs(max_y_dif)] + list(difs))
-    # Desenha as diferenças
-    twin = axs.twinx()
-    twin.stem(x, difs,
-              linefmt='grey',
-              markerfmt='none',
-              basefmt='none')
-    # Faz o plot da meta GT para o subsistema
-    x = range(max_x + 1)
-    y = [15000] * len(x)
-    h = plt.plot(x, y,
-                 linewidth=2,
-                 linestyle="dashed",
-                 color="red",
-                 alpha=0.65,
-                 label="Meta CMSE")
+    plt.savefig(os.path.join(dir_saida,
+                             "prospec_gt_sin.png"))
+    plt.close()
+
+
+def grafico_deficit_subsistema(casos: List[Caso],
+                               dir_saida: str):
+    # Cria o objeto de figura
+    fig, axs = plt.subplots(2, 2, figsize=(16, 9))
+    fig.suptitle("Déficit por Submercado",
+                 fontsize=14)
+    for ax in axs.flat:
+        ax.set(xlabel='', ylabel='Deficit (MWmed)')
+    # Variáveis para limitar os eixos no futuro
+    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    min_y = {s: 1e4 for s in SUBSISTEMAS}
+    max_x = 0
+
+    handlers_legendas = []
+    # Desenha as linhas
+    for s, sub in enumerate(SUBSISTEMAS):
+        # Decide qual subplot usar
+        subx = int(s / 2)
+        suby = s % 2
+        # Faz o plot para cada caso
+        for c, caso in enumerate(casos):
+            # Recalcula os máximos e mínimos
+            x = list(range(caso.n_revs + 1))
+            y = caso.def_subsis[sub]
+            max_x = max([len(x) - 1, max_x])
+            max_y[sub] = max([max_y[sub]] + list(y))
+            min_y[sub] = min([min_y[sub]] + list(y))
+            # Faz o plot
+            h = axs[subx, suby].plot(x, y,
+                                     linewidth=3,
+                                     linestyle="solid",
+                                     color=CORES[c],
+                                     alpha=0.8,
+                                     label=caso.nome)
+            handlers_legendas.append(h)
+        axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(min_y, max_y)
-    twin.set_ylim(-max_y_dif, max_y_dif)
-    plt.xticks(x_ticks, x_labels,
-               fontsize=9)
+    for s, sub in enumerate(SUBSISTEMAS):
+        subx = int(s / 2)
+        suby = s % 2
+        axs[subx, suby].set_xlim(0, max_x)
+        axs[subx, suby].set_ylim(0, max_y[sub])
+        axs[subx, suby].set_xticks(x_ticks + [max_x])
+        axs[subx, suby].set_xticklabels([""] + x_labels,
+                                        fontsize=9)
     plt.tight_layout()
+    fig.legend(handlers_legendas,
+               labels=[c.nome for c in casos],
+               loc="lower center",
+               borderaxespad=0.2,
+               ncol=len(casos))
+
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(bottom=0.085)
     plt.savefig(os.path.join(dir_saida,
-                             "backtest_gt_sin_dif.png"))
+                             "prospec_def_subsis.png"))
     plt.close()
 
 

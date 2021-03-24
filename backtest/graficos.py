@@ -120,7 +120,7 @@ def grafico_earm_subsistema(casos: List[Caso],
     max_y = {s: 0.0 for s in SUBSISTEMAS}
     min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
-
+    vminp = {"SE": 20, "S": 30, "NE": 23.5, "N": 20.8}
     handlers_legendas = []
     # Desenha as linhas
     for s, sub in enumerate(SUBSISTEMAS):
@@ -143,6 +143,15 @@ def grafico_earm_subsistema(casos: List[Caso],
                                      alpha=0.8,
                                      label=caso.nome)
             handlers_legendas.append(h)
+        # Faz o plot do vminp para o subsistema
+        x = range(max_x + 2)
+        y = [vminp[sub]] * len(x)
+        h = axs[subx, suby].plot(x, y,
+                             linewidth=2,
+                             linestyle="dashed",
+                             color="red",
+                             alpha=0.65,
+                             label="VminOP")
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
@@ -307,6 +316,15 @@ def grafico_gt_sin(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
+    # Faz o plot da meta GT para o subsistema
+    x = range(max_x + 1)
+    y = [15000] * len(x)
+    h = plt.plot(x, y,
+                 linewidth=2,
+                 linestyle="dashed",
+                 color="red",
+                 alpha=0.65,
+                 label="Meta CMSE")
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
@@ -350,7 +368,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
         for c, caso in enumerate(casos):
             # Recalcula os máximos e mínimos
             x = list(range(caso.n_revs + 1))
-            y = caso.earm_subsis[sub]
+            y = caso.def_subsis[sub]
             max_x = max([len(x) - 1, max_x])
             max_y[sub] = max([max_y[sub]] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
@@ -383,7 +401,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.085)
     plt.savefig(os.path.join(dir_saida,
-                             "backtest_earm_subsis.png"))
+                             "backtest_def_subsis.png"))
     plt.close()
 
 
