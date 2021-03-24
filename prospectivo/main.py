@@ -12,20 +12,25 @@ from graficos_compara import grafico_gt_subsistema_dif  # type: ignore
 from graficos_compara import grafico_gt_sin_dif  # type: ignore
 from graficos_compara import grafico_earm_sin_dif  # type: ignore
 
-# TODO - 
-# Fazer gráficos cabeleira para o teste 20
-# Trocar os diretórios de entrada do backtest para variáveis de ambiente (.env.example)
-# Usar python dotenv
+from dotenv import load_dotenv
+import os
+
+# Carrega variáveis de ambiente
+load_dotenv()
 
 def main():
+
+
     # Diretórios com as saídas do backtest no formato
     # relato_AAAA_MM.rvX
-    dir_semRHE = "/home/rogerio/ONS/prospectivo_mario/saidas_semRHE/saidas_decomp"
-    dir_comRHE = "/home/rogerio/ONS/prospectivo_mario/saidas_comRHEmix/saidas_decomp"
+    
+    dir_semRHE = os.getenv("DIR_PROSPECTIVO_SEM_RHE")
+    dir_comRHE = os.getenv("DIR_PROSPECTIVO_COM_RHE")
+    
 
     # Constroi os casos
     semRHE = Caso.constroi_caso_de_pasta(dir_semRHE,
-                                          "Sem RHE")
+                                         "Sem RHE")
     comRHE = Caso.constroi_caso_de_pasta(dir_comRHE,
                                          "RHEmix CPAMP")
 
@@ -48,7 +53,7 @@ def main():
     # GT para SIN
     grafico_gt_sin(casos, saida)
 
-    saida_cmp = "saidas/compara_prospectivo"
+    saida_cmp = os.getenv("DIR_SAIDA_PROSPECTIVO")
 
     print("Gerando diferenças")
     # Gera os gráficos de comparação

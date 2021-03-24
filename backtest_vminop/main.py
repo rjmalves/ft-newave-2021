@@ -6,18 +6,25 @@ from graficos import grafico_gt_sin  # type: ignore
 from graficos import grafico_gt_subsistema  # type: ignore
 from graficos import exporta_dados  # type: ignore
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def main():
     # Diretórios com as saídas do backtest no formato
     # relato_AAAA_MM.rvX
-    dir_oficial = "/home/rogerio/ONS/vminop/saidas_oficial_semRHE/saidas_decomp"
-    dir_soft_p2000 = "/home/rogerio/ONS/vminop/saidas_RHEsoft_penal2000/saidas_decomp"
-    dir_hard_p2000 = "/home/rogerio/ONS/vminop/saidas_RHEhard_penal2000/saidas_decomp"
-    dir_hard_pBigM = "/home/rogerio/ONS/vminop/saidas_RHEhard_penalBigM/saidas_decomp"
-    dir_hard_pBigM_TD = "/home/rogerio/ONS/vminop/saidas_RHEhard_penalBigM_TD/saidas_decomp"
-    dir_mix_hard_p2000_soft_p2000 = "/home/rogerio/ONS/vminop/saidas_RHEmix_hard2000_soft2000/saidas_decomp"
-    dir_mix_hard_pBigM_soft_p2000 = "/home/rogerio/ONS/vminop/saidas_RHEmix_hardBigM_soft2000/saidas_decomp"
-    dir_mix_hard_p2000_ultSemana_soft_p2000 = "/home/rogerio/ONS/vminop/saidas_RHEmix_hard2000_ultSemana_soft2000/saidas_decomp"
+    dir_oficial = os.getenv("DIR_OFICIAL")
+    dir_soft_p2000 = os.getenv("DIR_SOFT_P2000")
+    dir_hard_p2000 = os.getenv("DIR_HARD_P2000")
+    dir_hard_pBigM = os.getenv("DIR_HARD_PBIGM")
+    dir_hard_pBigM_TD = os.getenv("DIR_HARD_PBIGM_TD")
+    env = "DIR_MIX_HARD_P2000_SOFT_P2000"
+    dir_mix_hard_p2000_soft_p2000 = os.getenv(env)
+    env = "DIR_MIX_HARD_PBIGM_SOFT_P2000"
+    dir_mix_hard_pBigM_soft_p2000 = os.getenv(env)
+    env = "DIR_MIX_HARD_P2000_ULTSEMANA_SOFT_P2000"
+    dir_mix_hard_p2000_ultSemana_soft_p2000 = os.getenv(env)
 
     # Constroi os casos
     oficial = Caso.constroi_caso_de_pasta(dir_oficial,
@@ -47,7 +54,8 @@ def main():
              mix_hard_pBigM_soft_p2000,
              mix_hard_p2000_ultSemana_soft_p2000
             ]
-    saida = "saidas/vminop"
+
+    saida = os.getenv("DIR_SAIDA")
 
     # Gera os gráficos
     # saida = "saidas/smap"
