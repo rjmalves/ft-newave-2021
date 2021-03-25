@@ -30,6 +30,17 @@ TIPOS = [
          "dashed"
         ]
 
+LARGURAS = [
+            3,
+            3,
+            3,
+            3,
+            3,
+            2,
+            2,
+            2,
+            2
+           ]
 
 def xticks_graficos() -> Tuple[List[int], List[str]]:
     """
@@ -80,7 +91,7 @@ def grafico_cmo_subsistema(casos: List[Caso],
             min_y = min([min_y] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
+                                     linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
                                      alpha=0.8,
@@ -102,10 +113,10 @@ def grafico_cmo_subsistema(casos: List[Caso],
                labels=[c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
-               ncol=len(casos))
+               ncol=5)
 
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.085)
+    plt.subplots_adjust(bottom=0.115)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_cmo.png"))
     plt.close()
@@ -140,7 +151,7 @@ def grafico_earm_subsistema(casos: List[Caso],
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
+                                     linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
                                      alpha=0.8,
@@ -171,10 +182,10 @@ def grafico_earm_subsistema(casos: List[Caso],
                labels=[c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
-               ncol=len(casos))
+               ncol=5)
 
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.085)
+    plt.subplots_adjust(bottom=0.115)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_earm_subsis.png"))
     plt.close()
@@ -209,7 +220,7 @@ def grafico_gt_subsistema(casos: List[Caso],
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
+                                     linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
                                      alpha=0.8,
@@ -232,10 +243,10 @@ def grafico_gt_subsistema(casos: List[Caso],
                labels=[c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
-               ncol=len(casos))
+               ncol=5)
 
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.085)
+    plt.subplots_adjust(bottom=0.115)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_gt_subsis.png"))
     plt.close()
@@ -263,7 +274,7 @@ def grafico_earm_sin(casos: List[Caso],
         min_y = min([min_y] + list(y))
         # Faz o plot
         h = plt.plot(x, y,
-                     linewidth=3,
+                     linewidth=LARGURAS[c],
                      linestyle=TIPOS[c],
                      color=CORES[c],
                      alpha=0.8,
@@ -281,10 +292,10 @@ def grafico_earm_sin(casos: List[Caso],
     plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
-               bbox_to_anchor=(0.462, -0.18),
+               bbox_to_anchor=(0.462, -0.25),
                loc="lower center",
                borderaxespad=0,
-               ncol=len(casos),
+               ncol=5,
                fontsize=9)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_earm_sin.png"))
@@ -313,7 +324,7 @@ def grafico_gt_sin(casos: List[Caso],
         min_y = min([min_y] + list(y))
         # Faz o plot
         h = plt.plot(x, y,
-                     linewidth=3,
+                     linewidth=LARGURAS[c],
                      linestyle=TIPOS[c],
                      color=CORES[c],
                      alpha=0.8,
@@ -338,10 +349,10 @@ def grafico_gt_sin(casos: List[Caso],
     plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
-               bbox_to_anchor=(0.462, -0.18),
+               bbox_to_anchor=(0.462, -0.25),
                loc="lower center",
                borderaxespad=0,
-               ncol=len(casos),
+               ncol=5,
                fontsize=9)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_gt_sin.png"))
@@ -377,7 +388,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
+                                     linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
                                      alpha=0.8,
@@ -399,10 +410,10 @@ def grafico_deficit_subsistema(casos: List[Caso],
                labels=[c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
-               ncol=len(casos))
+               ncol=5)
 
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.085)
+    plt.subplots_adjust(bottom=0.115)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_def_subsis.png"))
     plt.close()

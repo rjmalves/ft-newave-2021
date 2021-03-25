@@ -33,16 +33,16 @@ def main():
     # Constroi os casos
     oficial = Caso.constroi_caso_de_pasta(dir_oficial,
                                           "Oficial")
-    nome = "$\\alpha$ = 50%, $\\lambda$ = 25%"
+    nome = "$\\alpha$ = 50%, $\\lambda$ = 25% PAR(p)"
     cvar_50x25_parp = Caso.constroi_caso_de_pasta(dir_cvar_50x25_parp,
                                                   nome)
-    nome = "$\\alpha$ = 50%, $\\lambda$ = 35%"
+    nome = "$\\alpha$ = 50%, $\\lambda$ = 35% PAR(p)"
     cvar_50x35_parp = Caso.constroi_caso_de_pasta(dir_cvar_50x35_parp,
                                                   nome)
-    nome = "$\\alpha$ = 50%, $\\lambda$ = 50%"
+    nome = "$\\alpha$ = 50%, $\\lambda$ = 50% PAR(p)"
     cvar_50x50_parp = Caso.constroi_caso_de_pasta(dir_cvar_50x50_parp,
                                                   nome)
-    nome = "$\\alpha$ = 25%, $\\lambda$ = 50%"
+    nome = "$\\alpha$ = 25%, $\\lambda$ = 50% PAR(p)"
     cvar_25x50_parp = Caso.constroi_caso_de_pasta(dir_cvar_25x50_parp,
                                                   nome)
     nome = "$\\alpha$ = 50%, $\\lambda$ = 25%"
