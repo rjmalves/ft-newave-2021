@@ -296,7 +296,7 @@ def grafico_earm_sin(casos: List[Caso],
                loc="lower center",
                borderaxespad=0,
                ncol=5,
-               fontsize=9)
+               fontsize=8)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_earm_sin.png"))
     plt.close()
@@ -353,7 +353,7 @@ def grafico_gt_sin(casos: List[Caso],
                loc="lower center",
                borderaxespad=0,
                ncol=5,
-               fontsize=9)
+               fontsize=8)
     plt.savefig(os.path.join(dir_saida,
                              "backtest_gt_sin.png"))
     plt.close()
