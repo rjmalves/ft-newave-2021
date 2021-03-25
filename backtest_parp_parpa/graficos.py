@@ -289,7 +289,7 @@ def grafico_earm_sin(casos: List[Caso],
                fontsize=9)
     plt.tight_layout()
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(bottom=0.20)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.25),
@@ -346,7 +346,7 @@ def grafico_gt_sin(casos: List[Caso],
     plt.xticks(x_ticks, x_labels, fontsize=9)
     plt.tight_layout()
     # Salva o arquivo de saída
-    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(bottom=0.20)
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.25),
