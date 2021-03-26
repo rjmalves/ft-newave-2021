@@ -188,6 +188,7 @@ class YuleWalkerPARA:
                                    2 * self.periodos))
         self.sinal_n = np.zeros((self.n_amostras,
                                  2 * self.periodos))
+        self.desvios_sinal = np.zeros((2 * self.periodos,))
         # Lê os sinais brutos e monta o horizonte de 24 meses
         # das configurações respectivas
         p = self.periodos
@@ -195,17 +196,20 @@ class YuleWalkerPARA:
             self.sinal_bkp[:, i] = deepcopy(self.sinal[c][:, i % p])
         # Gera as médias por período
         self.medias = self._medias_per(deepcopy(self.sinal_bkp))
+        self.desvios_medias = np.zeros((self.periodos,))
         # Normaliza o sinal
         for j in range(2 * p):
             med = np.mean(self.sinal_bkp[:, j])
             dsv = np.std(self.sinal_bkp[:, j], ddof=self.ddof)
             self.sinal_n[:, j] = (self.sinal_bkp[:, j] - med) / dsv
+            self.desvios_sinal[j] = dsv
         # Normaliza as médias
         self.medias_n = np.zeros_like(self.medias)
         for j in range(p):
             med = np.mean(self.medias[1:, j])
             dsv = np.std(self.medias[1:, j], ddof=self.ddof)
             self.medias_n[1:, j] = (self.medias[1:, j] - med) / dsv
+            self.desvios_medias[j] = dsv
 
     def _medias_per(self,
                     sinal: np.ndarray) -> np.ndarray:

@@ -40,6 +40,7 @@ from inewave.nwlistop.eafbm00 import LeituraEafbm00
 from inewave.nwlistop.modelos.eafbm00 import Eafbm00
 from inewave.nwlistop.modelos.mediasmerc import MediasMerc
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 from typing import List, Dict
 
@@ -61,6 +62,9 @@ CORES = ["orangered",
          "gold",
          "springgreen"]
 
+CORES_BOXES = ["springgreen",
+               "black"]
+
 ESTILOS = ["solid",
            "solid",
            "solid",
@@ -73,6 +77,59 @@ xlabels = ["", "", "", "ABR\n2021", "", "", "", "", "", "", "NOV\n2021", "",
            "", "", "", "ABR\n2023", "", "", "", "", "", "", "NOV\n2023", "",
            "", "", "", "ABR\n2024", "", "", "", "", "", "", "NOV\n2024", "",
            "", "", "", "ABR\n2025", "", "", "", "", "", "", "NOV\n2025", "" ]
+
+xlabels_boxes = ["JAN\n2021", "FEV\n2021", "MAR\n2021", "ABR\n2021",
+                 "MAI\n2021", "JUN\n2021", "JUL\n2021", "AGO\n2021",
+                 "SET\n2021", "OUT\n2021", "NOV\n2021", "DEZ\n2021"]
+
+mlt = {"SUL": np.array([7578.947109,
+                        8353.733091,
+                        7091.32785,
+                        6593.198947,
+                        8575.623952,
+                        10436.38004,
+                        10982.2097,
+                        10079.67903,
+                        11797.27154,
+                        13441.68193,
+                        9425.657175,
+                        7453.415242]),
+       "SUDESTE": np.array([65939.26526,
+                            70761.90476,
+                            68949.31877,
+                            54749.85816,
+                            39972.38701,
+                            32633.28732,
+                            25736.06484,
+                            20627.69028,
+                            19795.06843,
+                            23766.68375,
+                            31442.20876,
+                            48011.39621]),
+       "NORDESTE": np.array([13660.03734,
+                             14373.16351,
+                             14224.43226,
+                             11604.44857,
+                             7020.822773,
+                             4640,
+                             3827.408297,
+                             3338.147758,
+                             2984.776095,
+                             3257.817914,
+                             5297.435161,
+                             9873.402405]),
+       "NORTE": [15694.83658,
+                 22780.20976,
+                 26715.41545,
+                 26994.00506,
+                 20419.26383,
+                 10713.49383,
+                 5286.886206,
+                 3223.591086,
+                 2296.188787,
+                 2409.390474,
+                 4028.668135,
+                 8295.214222]}
 
 # # Lê os arquivos MEDIAS-MERC
 # medias_oficial_parp = LeituraMediasMerc(dir_oficial_parp).le_arquivo()
@@ -360,7 +417,7 @@ def grafico_cenarios_ena_sul(eafbms: List[Dict[str, Eafbm00]],
     max_y = {s: 0 for s in SUBMERCADOS}
     handlers_legendas = []
     # Cria o objeto de figura
-    plt.figure(figsize=(16, 9))
+    fig, axs = plt.subplots(figsize=(10, 5))
     plt.title(titulo,
               fontsize=14)
     plt.xlabel("")
@@ -371,31 +428,109 @@ def grafico_cenarios_ena_sul(eafbms: List[Dict[str, Eafbm00]],
         eafb_mes_estudo: List[np.ndarray] = []
         for ano in anos:
             for mes in meses:
-                eafb_mes_estudo.append(eafb[ano][mes, :])
+                eafb_mlt = eafb[ano][mes, :] / mlt[sub][mes]
+                eafb_mes_estudo.append(eafb_mlt)
         
         # Desenha o boxplot para cada mês de estudo
         h = plt.boxplot(eafb_mes_estudo,
                         positions=x_boxes[i],
-                        whis=(0, 100))
+                        whis=(0, 100),
+                        patch_artist=True,
+                        boxprops={"facecolor": CORES[i],
+                                  "color": CORES[i]},
+                        capprops={"color": CORES[i]},
+                        whiskerprops={"color": CORES[i]},
+                        flierprops={"color": CORES[i],
+                                    "markeredgecolor": CORES[i]},
+                        medianprops={"color": "black"})
+    
+    plt.xticks(ticks=x,
+               labels=xlabels_boxes[:len(x)])
+    plt.tight_layout()
+    # Cria legenda customizada
+    custom_leg = [Line2D([], [],
+                         color=CORES[i],
+                         marker="s",
+                         linestyle="None",
+                         markersize=12)
+                  for i in range(len(nomes))]
+    fig.legend(handles=custom_leg,
+               labels=nomes,
+               loc="lower center",
+               borderaxespad=0.2,
+               ncol=len(nomes))
+    plt.subplots_adjust(bottom=0.140)
+    plt.savefig(dir_saida)
+    plt.close()
+
+# Gera os gráficos "Cabeleira" para o SUL
+def grafico_cenarios_ena_sul_compara(eafbms: List[Dict[str, Eafbm00]],
+                                     nomes: List[str],
+                                     titulo: str,
+                                     dir_saida: str):
+    sub = "SUL"
+    n_meses = 12 * len(anos)
+    x = np.array(range(0, 2 * n_meses, 2))
+    x_boxes = [x + i * 0.5 for i in range(len(eafbms))]
+    min_y = {s: 1e6 for s in SUBMERCADOS}
+    max_y = {s: 0 for s in SUBMERCADOS}
+    handlers_legendas = []
+    # Cria o objeto de figura
+    fig, axs = plt.subplots(figsize=(10, 5))
+    plt.title(titulo,
+              fontsize=14)
+    plt.xlabel("")
+    plt.ylabel('ENA (MWmed)')
+    for i, (eafbs_subs, nome) in enumerate(zip(eafbms, nomes)):
+        # Agrupa as energias por mes de estudo
+        eafb = eafbs_subs[sub].energias_por_ano
+        eafb_mes_estudo: List[np.ndarray] = []
+        for ano in anos:
+            for mes in meses:
+                eafb_mlt = eafb[ano][mes, :] / mlt[sub][mes]
+                eafb_mes_estudo.append(eafb_mlt)
+        
+        # Desenha o boxplot para cada mês de estudo
+        h = plt.boxplot(eafb_mes_estudo,
+                        positions=x_boxes[i],
+                        whis=(0, 100),
+                        # notch=True,
+                        patch_artist=True,
+                        boxprops={"facecolor": CORES_BOXES[i],
+                                  "color": CORES_BOXES[i]},
+                        capprops={"color": CORES_BOXES[i]},
+                        whiskerprops={"color": CORES_BOXES[i]},
+                        flierprops={"color": CORES_BOXES[i],
+                                    "markeredgecolor": CORES_BOXES[i]},
+                        medianprops={"color": CORES_BOXES[i]})
+        handlers_legendas.append(h)
         
     
     plt.xticks(ticks=x,
-               labels=xlabels[:len(x)])
+               labels=xlabels_boxes[:len(x)])
     plt.tight_layout()
-    # fig.legend(handlers_legendas,
-    #            labels=nomes,
-    #            loc="lower center",
-    #            borderaxespad=0.2,
-    #            ncol=len(nomes))
+    # Cria legenda customizada
+    custom_leg = [Line2D([], [],
+                         color=CORES_BOXES[i],
+                         marker="s",
+                         linestyle="None",
+                         markersize=12)
+                  for i in range(len(nomes))]
+    fig.legend(handles=custom_leg,
+               labels=nomes,
+               loc="lower center",
+               borderaxespad=0.2,
+               ncol=len(nomes))
+    plt.subplots_adjust(bottom=0.140)
     plt.savefig(dir_saida)
     plt.close()
 
 grafico_cenarios_ena_sul([eafbm_sul50_parp,
                           eafbm_oficial_parp,
                           eafbm_sul150_parp],
-                         ["Sul 50% MLT PAR(p",
-                          "Sul 100% MLT PAR(p",
-                          "Sul 150% MLT PAR(p",],
+                         ["Sul 50% MLT PAR(p)",
+                          "Sul 100% MLT PAR(p)",
+                          "Sul 150% MLT PAR(p)",],
                          "Distribuição da ENA SUL - PAR(p)",
                          "saidas/teste20_ena_cenarios_parp.png")
 
@@ -407,3 +542,24 @@ grafico_cenarios_ena_sul([eafbm_sul50_parpa,
                           "Sul 150% MLT PAR(p)-A",],
                          "Distribuição da ENA SUL - PAR(p)-A",
                          "saidas/teste20_ena_cenarios_parpa.png")
+
+grafico_cenarios_ena_sul_compara([eafbm_sul50_parpa,
+                                  eafbm_sul50_parp],
+                                 ["Sul 50% MLT PAR(p)-A",
+                                  "Sul 50% MLT PAR(p)",],
+                                 "Distribuição da ENA SUL - PAR(p) e PAR(p)-A - 50% MLT",
+                                 "saidas/teste20_ena_cenarios_parp_parpa_50.png")
+
+grafico_cenarios_ena_sul_compara([eafbm_oficial_parpa,
+                                  eafbm_oficial_parp],
+                                 ["Sul 100% MLT PAR(p)-A",
+                                  "Sul 100% MLT PAR(p)",],
+                                 "Distribuição da ENA SUL - PAR(p) e PAR(p)-A - 100% MLT",
+                                 "saidas/teste20_ena_cenarios_parp_parpa_100.png")
+
+grafico_cenarios_ena_sul_compara([eafbm_sul150_parpa,
+                                  eafbm_sul150_parp],
+                                 ["Sul 150% MLT PAR(p)-A",
+                                  "Sul 150% MLT PAR(p)",],
+                                 "Distribuição da ENA SUL - PAR(p) e PAR(p)-A - 150% MLT",
+                                 "saidas/teste20_ena_cenarios_parp_parpa_150.png")
