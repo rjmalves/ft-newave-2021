@@ -29,6 +29,7 @@ def main():
     dir_cvar_50x35_parpa = os.getenv("DIR_CVAR_5035_PARPA")
     dir_cvar_50x50_parpa = os.getenv("DIR_CVAR_5050_PARPA")
     dir_cvar_25x50_parpa = os.getenv("DIR_CVAR_2550_PARPA")
+    dir_cvar_50x25_dcp3010 = os.getenv("DIR_CVAR_5025_decomp3010")
 
     # Constroi os casos
     oficial = Caso.constroi_caso_de_pasta(dir_oficial,
@@ -57,6 +58,9 @@ def main():
     nome = "$\\alpha$ = 25%, $\\lambda$ = 50%"
     cvar_25x50_parpa = Caso.constroi_caso_de_pasta(dir_cvar_25x50_parpa,
                                                    nome)
+    nome = "$\\alpha$ = 25%, $\\lambda$ = 50% DCP 30.10"
+    cvar_25x50_dcp3010 = Caso.constroi_caso_de_pasta(dir_cvar_50x25_dcp3010,
+                                                     nome)
 
 
     casos = [
@@ -90,7 +94,7 @@ def main():
                  oficial,
                  cvar_50x35_parp,
                  cvar_50x35_parpa
-                 ]
+                ]
 
     saida_cmp = os.getenv("DIR_SAIDA_CMP")
 
@@ -101,6 +105,21 @@ def main():
     grafico_gt_subsistema_dif(casos_cmp, saida_cmp)
     grafico_earm_sin_dif(casos_cmp, saida_cmp)
     grafico_gt_sin_dif(casos_cmp, saida_cmp)
+
+
+    casos_cmp_vers = [
+                      oficial,
+                      cvar_25x50_parp,
+                      cvar_25x50_dcp3010
+                     ]
+
+    saida_cmp_vers = os.getenv("DIR_SAIDA_CMP_VERS_DCP")
+    # Gera os gráficos de comparação
+    grafico_cmo_subsistema_dif(casos_cmp_vers, saida_cmp_vers)
+    grafico_earm_subsistema_dif(casos_cmp_vers, saida_cmp_vers)
+    grafico_gt_subsistema_dif(casos_cmp_vers, saida_cmp_vers)
+    grafico_earm_sin_dif(casos_cmp_vers, saida_cmp_vers)
+    grafico_gt_sin_dif(casos_cmp_vers, saida_cmp_vers)
 
     # Exporta os dados
     for c in casos:
