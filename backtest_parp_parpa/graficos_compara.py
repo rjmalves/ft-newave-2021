@@ -118,7 +118,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
-        twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
+        twins[subx][suby].set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
                labels=[c.nome for c in casos],
@@ -206,7 +206,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks + [len(x_ticks)])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
-        twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
+        twins[subx][suby].set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
                labels=[c.nome for c in casos],
@@ -285,7 +285,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
-        twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
+        twins[subx][suby].set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
                labels=[c.nome for c in casos],
@@ -350,7 +350,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
     plt.ylim(0, 100)
-    twin.set_ylim(-max_y_dif, max_y_dif)
+    twin.set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.xticks(x_ticks + [max_x],
                [""] + x_labels,
                fontsize=9)
@@ -422,7 +422,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
     plt.ylim(min_y, max_y)
-    twin.set_ylim(-max_y_dif, max_y_dif)
+    twin.set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.xticks(x_ticks, x_labels,
                fontsize=9)
     plt.tight_layout()
