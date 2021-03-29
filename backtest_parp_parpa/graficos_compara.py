@@ -9,8 +9,8 @@ from caso import SUBSISTEMAS  # type: ignore
 
 CORES = [
          "black",
-         "springgreen",
-         "springgreen"
+         "lightsalmon",
+         "lightsalmon"
          ]
 
 TIPOS = [
