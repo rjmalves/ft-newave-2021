@@ -96,12 +96,11 @@ for ree in IDS_REES:
             c_ant = cfgs.configs_por_ano[a_ant]
             c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
-        # Realiza a estimação para o ano
-        # TODO - IMPLEMENTAR A FUNÇÃO PARA CALCULAR OS FIS E O PSI
-        # IMPLEMENTAR A FUNÇÃO DE VERIFICAR A CONTRIBUIÇÃO DO COEFICIENTE
-        # CONFERIR A CONTRIBUIÇÃO DE CADA COEFICIENTE NA ORDEM FINAL
-        # ESCOLHIDA, ALÉM DA ORDEM EM SI (TEM QUE LER ISSO DO PARP)
-        coefs_estimados = yw.estima_modelo(ordens_finais, configs)
+        # Calcula as ordens finais partindo das ordens inciais
+        print(f"Ordens originais: {ordens_originais}")
+        ordens_finais = yw.reducao_ordem(ordens_originais, configs)
+        print(f"Ordens finais estimadas: {ordens_finais}")
+        print(f"Ordens finais NEWAVE: {parp.ordens_finais_ree(ree)[ano]}")
         # Atualiza as variáveis com as máximas diferenças
         for p, coefs_p in enumerate(coefs_estimados):
             for i, c in enumerate(coefs_p):

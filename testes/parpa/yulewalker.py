@@ -444,3 +444,74 @@ class YuleWalkerPARA:
             ccruz.append(self._cov_media(col_p,
                                          col_p - o))
         return ccruz
+
+    def contribuicoes(self,
+                      coefs: List[List[float]]):
+        """
+        """
+        contribs: List[List[float]] = []
+        # Para cada mês
+        for p in range(len(coefs)):
+            coefs_mes = coefs[p]
+            ordem_mes = len(coefs_mes) - 1
+            contribs_mes: List[float] = []
+            desv_mes = self.desvios_sinal[p + 12]
+            # Calcula a contribuição da média
+            desv_media = self.desvios_medias[p]
+            contrib_media = coefs_mes[-1] * desv_mes / desv_media
+            # Para cada coeficiente, calcula a contribuição
+            for i in range(ordem_mes):
+                desv_lag = self.desvios_sinal[p + 12 - (i + 1)]
+                contrib = coefs_mes[i] * desv_mes / desv_lag
+                # Soma 1/12 do coef da média
+                # contrib += contrib_media / 12
+                contribs_mes.append(contrib)
+            contribs_mes.append(contrib_media)
+            contribs.append(contribs_mes)
+        return contribs
+
+    def verifica_contrib_negativa(self,
+                                  ordens: np.ndarray,
+                                  contribs: List[List[float]]) -> int:
+        """
+        """
+        for i, contrib in enumerate(contribs):
+            ordem = ordens[i]
+            for j in range(ordem):
+                if contrib[j] < 0:
+                    str_log = ("Contribuição do coef de ordem"
+                               + f" {j + 1} no mês {i + 1} é negativa")
+                    print(str_log)
+                    return i + 1
+        return 0
+
+    def reducao_ordem(self,
+                      ordens_iniciais: np.ndarray,
+                      configs: np.ndarray) -> List[float]:
+        """
+        """
+        ordens = deepcopy(ordens_iniciais)
+        # Realiza a estimação inicial
+        coefs_estimados = self.estima_modelo(ordens, configs)
+        # Calcula as contribuições a partir dos desvios
+        contribs = self.contribuicoes(coefs_estimados)
+        mes_contrib_negativa = self.verifica_contrib_negativa(ordens,
+                                                              contribs)
+        print("Contribuições antes da redução")
+        print(contribs)
+        while True:
+            # Se não foi encontrada nenhuma contribuição negativa,
+            # então termina o loop.
+            if mes_contrib_negativa == 0:
+                break
+            # Senão, reduz a ordem do mês que teve contribuição negativa
+            # em 1 e tenta novamente.
+            ordens[mes_contrib_negativa - 1] -= 1
+            coefs_estimados = self.estima_modelo(ordens, configs)
+            contribs = self.contribuicoes(coefs_estimados)
+            mes_contrib_negativa = self.verifica_contrib_negativa(ordens,
+                                                                  contribs)
+        print("Contribuições depois da redução")
+        print(contribs)
+        # Retorna as ordens finais
+        return ordens
