@@ -8,8 +8,8 @@ from caso import Caso  # type: ignore
 from caso import SUBSISTEMAS  # type: ignore
 
 CORES = ["black",
-         "deepskyblue",
          "springgreen",
+         "deepskyblue",
          "gold",
          "lightsalmon",
          "orangered"]
@@ -85,12 +85,12 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         # Calcula as diferenças
         difs = (np.array(casos[1].cmo_subsis[sub][1:]) -
@@ -100,7 +100,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
         h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
-                                   basefmt='none',
+                                   basefmt='grey',
                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
@@ -117,7 +117,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
         twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -127,6 +127,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
     plt.savefig(os.path.join(dir_saida,
                              "backtest_cmo_dif.png"))
     plt.close()
+
 
 def grafico_earm_subsistema_dif(casos: List[Caso],
                                dir_saida: str):
@@ -164,12 +165,12 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         # Calcula as diferenças
         difs = (np.array(casos[1].earm_subsis[sub]) -
@@ -179,26 +180,26 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
-                                   basefmt='none',
+                                   basefmt='grey',
                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
         # Faz o plot do vminp para o subsistema
         x = range(max_x + 1)
         y = [vminp[sub]] * len(x)
-        h = axs[subx, suby].plot(x, y,
-                             linewidth=2,
-                             linestyle="dashed",
-                             color="red",
-                             alpha=0.65,
-                             label="VminOP")
+        h, = axs[subx, suby].plot(x, y,
+                                  linewidth=2,
+                                  linestyle="dashed",
+                                  color="red",
+                                  alpha=0.65,
+                                  label="VminOP")
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     for s, sub in enumerate(SUBSISTEMAS):
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(min_y, max_y)
+        axs[subx, suby].set_ylim(0, 100)
         axs[subx, suby].set_xticks(x_ticks + [len(x_ticks)])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
@@ -267,7 +268,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
         h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
-                                   basefmt='none',
+                                   basefmt='grey',
                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
@@ -341,7 +342,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
     twin.stem(x, difs,
               linefmt='grey',
               markerfmt='none',
-              basefmt='none')
+              basefmt='grey')
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     plt.xlim(0, max_x)
@@ -404,7 +405,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
     twin.stem(x, difs,
               linefmt='grey',
               markerfmt='none',
-              basefmt='none')
+              basefmt='grey')
     # Faz o plot da meta GT para o subsistema
     x = range(max_x + 1)
     y = [15000] * len(x)

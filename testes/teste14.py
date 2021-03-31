@@ -77,13 +77,14 @@ coef_e_max_dif_perc_ree: Dict[int, float] = {ree: 0
 
 
 # Faz a estimação para as ordens iniciais do modelo PAR(p)-A
-for ree in IDS_REES:
+for ree in [1]:
     print(f"Estimando para REE {ree} - {REES[ree - 1]}")
     series_energia = parp.series_energia_ree(ree)
     yw = YuleWalkerPARA(series_energia)
-    coefs = parp.coeficientes_ree(ree)
+    contribs = parp.contribuicoes_ree(ree)
     mes = 0
     for a, ano in enumerate(parp.anos_estudo):
+        print(f"Ano {ano}")
         ordens_originais = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
@@ -97,30 +98,31 @@ for ree in IDS_REES:
             c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         # Calcula as ordens finais partindo das ordens inciais
-        print(f"Ordens originais: {ordens_originais}")
-        ordens_finais = yw.reducao_ordem(ordens_originais, configs)
+        # print(f"Ordens originais:        {ordens_originais}")
+        ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais, configs)
         print(f"Ordens finais estimadas: {ordens_finais}")
-        print(f"Ordens finais NEWAVE: {parp.ordens_finais_ree(ree)[ano]}")
+        print(f"Ordens finais NEWAVE:    {parp.ordens_finais_ree(ree)[ano]}")
         # Atualiza as variáveis com as máximas diferenças
-        for p, coefs_p in enumerate(coefs_estimados):
-            for i, c in enumerate(coefs_p):
-                dif = abs(c - coefs[mes][i])
-                dif_percentual = abs(100 * abs(c - coefs[mes][i])
-                                     / coefs[p][i])
+        # print(contribs_estimadas)
+        for p, contribs_p in enumerate(contribs_estimadas):
+            for i, c in enumerate(contribs_p):
+                dif = abs(c - contribs[mes][i])
+                dif_percentual = abs(100 * abs(c - contribs[mes][i])
+                                     / contribs[p][i])
                 if dif > max_dif_ree[ree]:
                     max_dif_ree[ree] = dif
                     ano_max_dif_ree[ree] = ano
                     periodo_max_dif_ree[ree] = p + 1
                     ordem_max_dif_ree[ree] = i + 1
                     coef_e_max_dif_ree[ree] = c
-                    coef_o_max_dif_ree[ree] = coefs[p][i]
+                    coef_o_max_dif_ree[ree] = contribs[p][i]
                 if dif_percentual > max_dif_percent_ree[ree]:
                     max_dif_percent_ree[ree] = dif_percentual
                     ano_max_dif_perc_ree[ree] = ano
                     periodo_max_dif_perc_ree[ree] = p + 1
                     ordem_max_dif_perc_ree[ree] = i + 1
                     coef_e_max_dif_perc_ree[ree] = c
-                    coef_o_max_dif_perc_ree[ree] = coefs[p][i]
+                    coef_o_max_dif_perc_ree[ree] = contribs[p][i]
             mes += 1
 
 print("")

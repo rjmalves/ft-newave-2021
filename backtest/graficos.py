@@ -1,5 +1,7 @@
 
 import matplotlib.pyplot as plt  # type: ignore
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import csv
 import os
 from typing import List, Tuple
@@ -76,12 +78,12 @@ def grafico_cmo_subsistema(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
@@ -94,9 +96,13 @@ def grafico_cmo_subsistema(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
+        axs[subx, suby].set_yticks(range(0, int(max_y), 125),
+                                   minor=True)
+        axs[subx, suby].grid(which='major', axis='y', alpha=0.5)
+        axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -136,12 +142,12 @@ def grafico_earm_subsistema(casos: List[Caso],
             max_y[sub] = max([max_y[sub]] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         # Faz o plot do vminp para o subsistema
         x = range(max_x + 2)
@@ -163,9 +169,13 @@ def grafico_earm_subsistema(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks + [max_x])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
+        axs[subx, suby].set_yticks(range(0, 100, 5),
+                                   minor=True)
+        axs[subx, suby].grid(which='major', axis='y', alpha=0.5)
+        axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -186,7 +196,7 @@ def grafico_gt_subsistema(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
-    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    max_y = 0.0
     min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
 
@@ -202,15 +212,15 @@ def grafico_gt_subsistema(casos: List[Caso],
             x = list(range(caso.n_revs))
             y = caso.gt_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
-            max_y[sub] = max([max_y[sub]] + list(y))
+            max_y = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
@@ -219,14 +229,17 @@ def grafico_gt_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(0, max([max_y[s]
-                                         for s in SUBSISTEMAS]))
+        axs[subx, suby].set_ylim(0, max_y)
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
+        axs[subx, suby].set_yticks(range(0, int(max_y), 500),
+                                   minor=True)
+        axs[subx, suby].grid(which='major', axis='y', alpha=0.5)
+        axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -241,10 +254,10 @@ def grafico_gt_subsistema(casos: List[Caso],
 def grafico_earm_sin(casos: List[Caso],
                      dir_saida: str):
     # Cria o objeto de figura
-    plt.figure(figsize=(10, 5))
-    plt.title("Evolução do Armazenamento para o SIN",
-              fontsize=14)
-    plt.ylabel('EARM (% EARMax)')
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.set_title("Evolução do Armazenamento para o SIN",
+                 fontsize=14)
+    ax.set_ylabel('EARM (% EARMax)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
     min_y = 1e4
@@ -259,30 +272,33 @@ def grafico_earm_sin(casos: List[Caso],
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
         # Faz o plot
-        h = plt.plot(x, y,
-                     linewidth=3,
-                     linestyle="solid",
-                     color=CORES[c],
-                     alpha=0.8,
-                     label=caso.nome)
+        h, = ax.plot(x, y,
+                    linewidth=3,
+                    linestyle="solid",
+                    color=CORES[c],
+                    alpha=0.8,
+                    label=caso.nome)
         handlers_legendas.append(h)
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(0, 100)
-    plt.xticks(x_ticks + [max_x],
-               [""] + x_labels,
-               fontsize=9)
+    ax.set_xlim(0, max_x)
+    ax.set_ylim(0, 100)
+    ax.set_xticks(x_ticks + [max_x])
+    ax.set_xticklabels([""] + x_labels,
+                       fontsize=9)
+    ax.set_yticks(list(range(0, 100, 5)), minor=True)
+    ax.grid(which='major', axis='y', alpha=0.5)
+    ax.grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
-    # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
                loc="lower center",
                borderaxespad=0,
                ncol=len(casos),
                fontsize=9)
+    # Salva o arquivo de saída
     plt.savefig(os.path.join(dir_saida,
                              "backtest_earm_sin.png"))
     plt.close()
@@ -291,10 +307,10 @@ def grafico_earm_sin(casos: List[Caso],
 def grafico_gt_sin(casos: List[Caso],
                    dir_saida: str):
     # Cria o objeto de figura
-    plt.figure(figsize=(10, 5))
-    plt.title("Evolução da Geração Térmica para o SIN",
-              fontsize=14)
-    plt.ylabel('GT (MWmed)')
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.set_title("Evolução da Geração Térmica para o SIN",
+                 fontsize=14)
+    ax.set_ylabel('GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
     min_y = 1e4
@@ -309,7 +325,7 @@ def grafico_gt_sin(casos: List[Caso],
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
         # Faz o plot
-        h = plt.plot(x, y,
+        h, = ax.plot(x, y,
                      linewidth=3,
                      linestyle="solid",
                      color=CORES[c],
@@ -319,7 +335,7 @@ def grafico_gt_sin(casos: List[Caso],
     # Faz o plot da meta GT para o subsistema
     x = range(max_x + 1)
     y = [15000] * len(x)
-    h = plt.plot(x, y,
+    h, = ax.plot(x, y,
                  linewidth=2,
                  linestyle="dashed",
                  color="red",
@@ -327,14 +343,18 @@ def grafico_gt_sin(casos: List[Caso],
                  label="Meta CMSE")
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(min_y, max_y)
-    plt.xticks(x_ticks, x_labels, fontsize=9)
+    ax.set_xlim(0, max_x)
+    ax.set_ylim(min_y, max_y)
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels(x_labels, fontsize=9)
+    ax.set_yticks(list(range(0, int(max_y), 500)), minor=True)
+    ax.grid(which='major', axis='y', alpha=0.5)
+    ax.grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
     plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
                loc="lower center",
                borderaxespad=0,
@@ -354,7 +374,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='Deficit (MWmed)')
     # Variáveis para limitar os eixos no futuro
-    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    max_y = 0.0
     min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
 
@@ -370,15 +390,15 @@ def grafico_deficit_subsistema(casos: List[Caso],
             x = list(range(caso.n_revs + 1))
             y = caso.def_subsis[sub]
             max_x = max([len(x) - 1, max_x])
-            max_y[sub] = max([max_y[sub]] + list(y))
+            max_y = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
@@ -387,13 +407,18 @@ def grafico_deficit_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(0, max_y[sub])
+        if max_y > 0:
+            axs[subx, suby].set_ylim(0, max_y)
         axs[subx, suby].set_xticks(x_ticks + [max_x])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
+        axs[subx, suby].set_yticks(range(0, int(max_y), 500),
+                                   minor=True)
+        axs[subx, suby].grid(which='major', axis='y', alpha=0.5)
+        axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))

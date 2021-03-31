@@ -47,8 +47,8 @@ from typing import List, Dict
 
 # Variáveis auxiliares com os diretorios dos casos
 dir_base = "/home/rogerio/ONS/validacao_newave2745/"
-dir_oficial_parp = dir_base + "pmo_2021_01_oficial_parp"
-dir_oficial_parpa = dir_base + "pmo_2021_01_oficial_parpa"
+dir_oficial_parp = dir_base + "pmo_2021_01_sul_100_mlt_parp"
+dir_oficial_parpa = dir_base + "pmo_2021_01_sul_100_mlt_parpa"
 dir_sul50_parp = dir_base + "pmo_2021_01_sul_50_mlt_parp"
 dir_sul50_parpa = dir_base + "pmo_2021_01_sul_50_mlt_parpa"
 dir_sul150_parp = dir_base + "pmo_2021_01_sul_150_mlt_parp"
@@ -131,80 +131,89 @@ mlt = {"SUL": np.array([7578.947109,
                  4028.668135,
                  8295.214222]}
 
+anos = [2021, 2022, 2023, 2024, 2025]
+meses = list(range(12))
+
 # # Lê os arquivos MEDIAS-MERC
-# medias_oficial_parp = LeituraMediasMerc(dir_oficial_parp).le_arquivo()
-# medias_oficial_parpa = LeituraMediasMerc(dir_oficial_parpa).le_arquivo()
-# medias_sul50_parp = LeituraMediasMerc(dir_sul50_parp).le_arquivo()
-# medias_sul50_parpa = LeituraMediasMerc(dir_sul50_parpa).le_arquivo()
-# medias_sul150_parp = LeituraMediasMerc(dir_sul150_parp).le_arquivo()
-# medias_sul150_parpa = LeituraMediasMerc(dir_sul150_parpa).le_arquivo()
+medias_oficial_parp = LeituraMediasMerc(dir_oficial_parp).le_arquivo()
+medias_oficial_parpa = LeituraMediasMerc(dir_oficial_parpa).le_arquivo()
+medias_sul50_parp = LeituraMediasMerc(dir_sul50_parp).le_arquivo()
+medias_sul50_parpa = LeituraMediasMerc(dir_sul50_parpa).le_arquivo()
+medias_sul150_parp = LeituraMediasMerc(dir_sul150_parp).le_arquivo()
+medias_sul150_parpa = LeituraMediasMerc(dir_sul150_parpa).le_arquivo()
 
 
-# # Gera os gráficos de ENA
-# def grafico_ena(medias: List[MediasMerc],
-#                 nomes: List[str],
-#                 titulo: str,
-#                 dir_saida: str):
-#     n_meses = len(medias[0].energia_natural_afluente["SUL"])
-#     x = range(n_meses)
-#     min_y = {s: 1e5 for s in SUBMERCADOS}
-#     max_y = {s: 0 for s in SUBMERCADOS}
-#     handlers_legendas = []
-#     # Cria o objeto de figura
-#     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
-#     fig.suptitle(titulo,
-#                  fontsize=14)
-#     for ax in axs.flat:
-#         ax.set(xlabel='', ylabel='ENA (MWmed)')
-#     for i, (media, nome) in enumerate(zip(medias, nomes)):
-#         for s, sub in enumerate(SUBMERCADOS):
-#             # Decide qual subplot usar
-#             subx = int(s / 2)
-#             suby = s % 2
-#             ena = media.energia_natural_afluente[sub]
-#             min_y[sub] = min([min_y[sub]] + list(ena))
-#             max_y[sub] = max([max_y[sub]] + list(ena))
-#             h = axs[subx, suby].plot(x,
-#                                      ena,
-#                                      linewidth=3,
-#                                      linestyle=ESTILOS[i],
-#                                      color=CORES[i],
-#                                      alpha=0.7,
-#                                      label=nome)
-#             handlers_legendas.append(h)
-#             axs[subx, suby].set_title(sub)
-#     for s, sub in enumerate(SUBMERCADOS):
-#         subx = int(s / 2)
-#         suby = s % 2
-#         axs[subx, suby].set_xlim(0, n_meses-1)
-#         axs[subx, suby].set_ylim(min_y[sub], max_y[sub])
-#         axs[subx, suby].set_xticks(x)
-#         axs[subx, suby].set_xticklabels(xlabels,
-#                                         fontsize=9)
-#     plt.tight_layout()
-#     fig.legend(handlers_legendas,
-#                labels=nomes,
-#                loc="lower center",
-#                borderaxespad=0.2,
-#                ncol=len(nomes))
-#     plt.subplots_adjust(bottom=0.085)
-#     plt.savefig(dir_saida)
-#     plt.close()
+# Gera os gráficos de ENA
+def grafico_ena(medias: List[MediasMerc],
+                nomes: List[str],
+                titulo: str,
+                dir_saida: str):
+    n_meses = len(medias[0].energia_natural_afluente["SUL"])
+    x = range(n_meses)
+    min_y = {s: 1e5 for s in SUBMERCADOS}
+    max_y = {s: 0 for s in SUBMERCADOS}
+    handlers_legendas = []
+    # Cria o objeto de figura
+    fig, axs = plt.subplots(2, 2, figsize=(16, 9))
+    fig.suptitle(titulo,
+                 fontsize=14)
+    for ax in axs.flat:
+        ax.set(xlabel='', ylabel='ENA (MWmed)')
+    for i, (media, nome) in enumerate(zip(medias, nomes)):
+        for s, sub in enumerate(SUBMERCADOS):
+            # Decide qual subplot usar
+            subx = int(s / 2)
+            suby = s % 2
+            ena = media.energia_natural_afluente[sub]
+            ena_mes_estudo: List[float] = []
+            for mes in range(60):
+                ena_mlt = ena[mes] / mlt[sub][mes % 12]
+                ena_mes_estudo.append(ena_mlt)
+            if sub == "SUL":
+                print(f"caso: {nome} ena = {ena_mes_estudo[:12]}")
+            min_y[sub] = min([min_y[sub]] + list(ena_mes_estudo))
+            max_y[sub] = max([max_y[sub]] + list(ena_mes_estudo))
+            h = axs[subx, suby].plot(x,
+                                     ena_mes_estudo,
+                                     linewidth=3,
+                                     linestyle=ESTILOS[i],
+                                     color=CORES[i],
+                                     alpha=0.7,
+                                     label=nome)
+            handlers_legendas.append(h)
+            axs[subx, suby].set_title(sub)
+    for s, sub in enumerate(SUBMERCADOS):
+        subx = int(s / 2)
+        suby = s % 2
+        axs[subx, suby].set_xlim(0, n_meses-1)
+        axs[subx, suby].set_ylim(min_y[sub], max_y[sub])
+        axs[subx, suby].set_xticks(x)
+        axs[subx, suby].set_xticklabels(xlabels,
+                                        fontsize=9)
+    plt.tight_layout()
+    fig.legend(handlers_legendas,
+               labels=nomes,
+               loc="lower center",
+               borderaxespad=0.2,
+               ncol=len(nomes))
+    plt.subplots_adjust(bottom=0.085)
+    plt.savefig(dir_saida)
+    plt.close()
 
-# grafico_ena([medias_sul50_parp,
-#              medias_oficial_parp,
-#              medias_sul150_parp,
-#              medias_sul50_parpa,
-#              medias_oficial_parpa,
-#              medias_sul150_parpa],
-#             ["Sul 50% MLT PAR(p)",
-#              "Sul 100% MLT PAR(p)",
-#              "Sul 150% MLT PAR(p)",
-#              "Sul 50% MLT PAR(p)-A",
-#              "Sul 100% MLT PAR(p)-A",
-#              "Sul 150% MLT PAR(p)-A"],
-#             "ENA Média por Submercado",
-#             "saidas/teste20_ena.png")
+grafico_ena([medias_sul50_parp,
+             medias_oficial_parp,
+             medias_sul150_parp,
+             medias_sul50_parpa,
+             medias_oficial_parpa,
+             medias_sul150_parpa],
+            ["Sul 50% MLT PAR(p)",
+             "Sul 100% MLT PAR(p)",
+             "Sul 150% MLT PAR(p)",
+             "Sul 50% MLT PAR(p)-A",
+             "Sul 100% MLT PAR(p)-A",
+             "Sul 150% MLT PAR(p)-A"],
+            "ENA Média por Submercado",
+            "saidas/teste20_ena.png")
 
 # # Gera os gráficos de CMO
 # def grafico_cmo(medias: List[MediasMerc],
