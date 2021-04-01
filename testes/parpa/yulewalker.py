@@ -626,6 +626,8 @@ class YuleWalkerPARA:
             for i in range(1, max_lag):
                 aux = (p - i) % n_meses
                 for j in range(max_lag):
+                    # Sem somar 1 / 12 da contribuição da média no aux
+                    # abaixo, os resultados ficam idênticos ao NEWAVE
                     contrib_aux = fis[aux][j] + psis[aux] / 12
                     matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
                                         + matriz_aux[i - 1, j + 1])

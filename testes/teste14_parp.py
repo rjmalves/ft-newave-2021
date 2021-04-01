@@ -70,8 +70,8 @@ for ree in IDS_REES:
     yw = YuleWalkerPAR(series_energia)
     contribs = parp.contribuicoes_ree(ree)
     mes = 0
-    # for a, ano in enumerate([2020]):
-    for a, ano in enumerate(parp.anos_estudo):
+    for a, ano in enumerate([2020]):
+    # for a, ano in enumerate(parp.anos_estudo):
         ordens_originais = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
