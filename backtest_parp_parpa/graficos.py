@@ -402,7 +402,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
             x = list(range(caso.n_revs + 1))
             y = caso.def_subsis[sub]
             max_x = max([len(x) - 1, max_x])
-            max_y[sub] = max([max_y] + list(y))
+            max_y = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
