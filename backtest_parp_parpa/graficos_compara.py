@@ -349,7 +349,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
     axs.set_xticklabels([""] + x_labels,
                         fontsize=9)
     plt.tight_layout()
-    fig.legend(handlers_legendas,
+    plt.legend(handlers_legendas,
             [c.nome for c in casos],
             bbox_to_anchor=(0.462, -0.18),
             loc="lower center",
@@ -421,7 +421,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
     axs.set_xticklabels(x_labels,
                         fontsize=9)
     plt.tight_layout()
-    fig.legend(handlers_legendas,
+    plt.legend(handlers_legendas,
             [c.nome for c in casos],
             bbox_to_anchor=(0.462, -0.18),
             loc="lower center",
