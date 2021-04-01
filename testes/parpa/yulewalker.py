@@ -36,18 +36,40 @@ class YuleWalkerPAR:
     modelo PAR(p).
     """
     def __init__(self,
-                 sinal: np.ndarray):
-        self.sinal = deepcopy(sinal)
-        self.n_amostras, self.periodos = self.sinal.shape
+                 series_por_config: Dict[int, np.ndarray]):
+
         # O atributo ddof é usado para indicar se o desvio padrão
         # calculado é amostral ou populacional (é a quantia
         # subtraída do denoiminador - 'graus de liberdade')
         self.ddof = 0
-        # Normaliza o sinal por período
-        for j in range(self.periodos):
-            media = np.mean(self.sinal[:, j])
-            desvio = np.std(self.sinal[:, j], ddof=self.ddof)
-            self.sinal[:, j] = (self.sinal[:, j] - media) / desvio
+        self.sinal = deepcopy(series_por_config)
+        self.n_amostras, self.periodos = self.sinal[1].shape
+        self._atualiza_tabela_configs(np.ones((2 * self.periodos,),
+                                              dtype=np.int64))
+
+    def _atualiza_tabela_configs(self, configs: np.ndarray):
+        """
+        Gera novamente a tabela de sinais após receber uma
+        atualização na tabela de configurações.
+        """
+        self.tabela_configs = np.reshape(configs,
+                                         (configs.size,))
+        self.sinal_bkp = np.zeros((self.n_amostras,
+                                   2 * self.periodos))
+        self.sinal_n = np.zeros((self.n_amostras,
+                                 2 * self.periodos))
+        self.desvios_sinal = np.zeros((2 * self.periodos,))
+        # Lê os sinais brutos e monta o horizonte de 24 meses
+        # das configurações respectivas
+        p = self.periodos
+        for i, c in enumerate(self.tabela_configs):
+            self.sinal_bkp[:, i] = deepcopy(self.sinal[c][:, i % p])
+        # Normaliza o sinal
+        for j in range(2 * p):
+            med = np.mean(self.sinal_bkp[:, j])
+            dsv = np.std(self.sinal_bkp[:, j], ddof=self.ddof)
+            self.sinal_n[:, j] = (self.sinal_bkp[:, j] - med) / dsv
+            self.desvios_sinal[j] = dsv
 
     def _autocorr(self, p: int, lag: int) -> float:
         """
@@ -75,77 +97,81 @@ class YuleWalkerPAR:
         [1] K.W. Hipel A.I McLeod. Time Series Modelling of Water Resources
         and Environmental Systems, Volume 45, Cap. 14. 1994.
         """
-        lag_mod = lag % self.periodos
-        sinal_m = deepcopy(self.sinal[:, p])
-        sinal_lag = deepcopy(self.sinal[:, p - lag_mod])
+        sinal_m = deepcopy(self.sinal_n[:, p])
+        sinal_lag = deepcopy(self.sinal_n[:, lag])
         # Se o mês de referência para o cálculo das
         # autocorrelações, com o lag "volta um ano",
         # então descontamos uma amostra de cada.
-        if p < lag_mod:
+        if lag < self.periodos and p >= self.periodos:
             sinal_m = sinal_m[1:]
             sinal_lag = sinal_lag[:-1]
         u = (1.0 / self.n_amostras) * np.sum(np.multiply(sinal_m,
                                                          sinal_lag))
-        ac = (u / (np.std(sinal_m,
-                          ddof=self.ddof) *
-                   np.std(sinal_lag,
-                          ddof=self.ddof)))
-        return ac
+        return u
 
-    def _matriz_yw(self,
-                   p: int,
-                   o: int) -> np.ndarray:
+    def _matriz_extendida(self, p: int, lag: int) -> np.ndarray:
         """
-        Monta a matriz de Yule-Walker para um determinado período
-        `p` e de ordem `o`.
+        Retorna a matriz extendida que será usada para montar
+        o sistema de equações de Yule-Walker para um período
+        `p` e um lag máximo de `lag`.
         """
-        yw = np.ones((o, o))
-        for i in range(o):
-            for j in range(o):
-                if i == j:
-                    continue
-                m = 0
-                lag = 0
-                if j < i:
-                    m = (p - j - 1) % self.periodos
-                    lag = i - j
-                elif j > i:
-                    m = (p - i - 1) % self.periodos
-                    lag = j - i
-                yw[i, j] = self._autocorr(m, lag)
+        ORDEM_MATRIZ = lag + 1
+        # Monta a matriz YW
+        # print(f"MATRIZ EXTENDIDA p = {p} lag = {lag}")
+        mat = np.ones((ORDEM_MATRIZ, ORDEM_MATRIZ))
+        for i in range(ORDEM_MATRIZ):
+            for j in range(i + 1, ORDEM_MATRIZ):
+                m = p - i
+                lag = j - i
+                col_p = self.periodos + m
+                mat[i, j] = self._autocorr(col_p,
+                                           col_p - lag)
+                mat[j, i] = mat[i, j]
+        return mat
 
-        return yw
+    def _resolve_yw(self,
+                    mat: np.ndarray,
+                    lag: int) -> List[float]:
+        """
+        Monta e resolve o sistema de equações de Yule-Walker
+        a partir de uma matriz extendida, para um certo período
+        `p` e um lag `lag`.
+        """
+        ORDEM_MATRIZ = lag + 1
+        ind_submat = list(range(1, ORDEM_MATRIZ))
+        rho_grid = np.ix_(ind_submat, [0])
+        yw_grid = np.ix_(ind_submat, ind_submat)
+
+        yw = mat[yw_grid]
+        rho = mat[rho_grid]
+        coefs_norm = list(np.matmul(np.linalg.inv(yw), rho))
+        return [c[0] for c in coefs_norm]
 
     def estima_modelo(self,
-                      ordens: List[int]) -> List[List[float]]:
+                      ordens: List[int],
+                      configs: np.ndarray) -> List[List[float]]:
         """
         Realiza a estimação dos coeficientes do modelo PAR(p)
         a partir da resolução do sistema de Yule-Walker.
         """
-        # Para cada período, obtém os coeficientes
+        self._atualiza_tabela_configs(configs)
         coefs: List[List[float]] = []
         for p in range(self.periodos):
             o = ordens[p]
-            yw = self._matriz_yw(p, o)
-            # Obtém os coeficientes
-            autocors = np.array([self._autocorr(p, lag)
-                                 for lag in range(1, o + 1)]).T
-            coefs_norm = list(np.matmul(np.linalg.inv(yw), autocors))
-            coefs.append(coefs_norm)
+            mat = self._matriz_extendida(p, o)
+            coefs.append(self._resolve_yw(mat, o))
+
         return coefs
 
     def facp(self,
              p: int,
-             maxlag: int) -> np.ndarray:
+             maxlag: int,
+             configs: np.ndarray) -> np.ndarray:
         """
         Calcula a função de autocorrelação parcial periódica
         para um período `p`, considerando um máximo de atrasos `maxlag`.
         """
-        # Monta a matriz YW
-        yw = self._matriz_yw(p, maxlag)
-        # Obtém os coeficientes
-        autocors = np.array([self._autocorr(p, lag)
-                             for lag in range(1, maxlag + 1)]).T
+        self._atualiza_tabela_configs(configs)
         acps: List[float] = []
         # A FACP(k) é definida como o último coeficiente do modelo
         # AR de ordem k ajustado via Yule-Walker.
@@ -153,10 +179,110 @@ class YuleWalkerPAR:
         #
         # Ajuste_YW_ordem1[0], Ajuste_YW_ordem2[1], ...
         for o in range(1, maxlag):
-            acp = list(np.matmul(np.linalg.inv(yw[:o, :o]),
-                                 autocors[:o]))[o - 1]
-            acps.append(acp)
+            mat = self._matriz_extendida(p, o)
+            acps.append(self._resolve_yw(mat, o)[o - 1])
         return np.array(acps)
+
+    def escolhe_ordem_modelo(self,
+                             p: int,
+                             max_ordem: int,
+                             configs: np.ndarray) -> int:
+        """
+        """
+        interv_conf = 1.96/np.sqrt(self.n_amostras)
+        serie_facp = self.facp(p, 11, configs)
+        ordem = 1
+        for i in range(max_ordem):
+            if abs(serie_facp[i]) >= interv_conf:
+                ordem = i + 1
+        return ordem
+
+    def contribuicoes(self,
+                      coefs: List[List[float]]):
+        """
+        """
+        fis: List[List[float]] = []
+        n_meses = len(coefs)
+        max_lag = 11
+        # Para cada mês, calcula os fis
+        for p in range(len(coefs)):
+            coefs_mes = coefs[p]
+            ordem_mes = len(coefs_mes)
+            fis_mes: List[float] = []
+            desv_mes = self.desvios_sinal[p + 12]
+            # Calcula a contribuição da média
+            # Para cada coeficiente, calcula a contribuição própria
+            for i in range(ordem_mes):
+                desv_lag = self.desvios_sinal[p + 12 - (i + 1)]
+                fi = coefs_mes[i] * desv_mes / desv_lag
+                fis_mes.append(fi)
+            # Completa com 0s até ter 12 termos
+            fis_mes += [0] * (12 - len(fis_mes))
+            fis.append(fis_mes)
+        contribs: List[List[float]] = []
+        # Para cada mês, compôe as contribuições da maneira recursiva
+        for p in range(n_meses):
+            matriz_aux = np.zeros((max_lag, n_meses))
+            # Atribui a primeira linha da matriz auxiliar com os fis
+            for j in range(n_meses):
+                matriz_aux[0, j] = fis[p][j]
+            contribs_mes = [matriz_aux[0, 0]]
+            # Para cada coeficiente, adiciona as contribuições recursivas
+            for i in range(1, max_lag):
+                aux = (p - i) % n_meses
+                for j in range(max_lag):
+                    contrib_aux = fis[aux][j]
+                    matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
+                                        + matriz_aux[i - 1, j + 1])
+                contribs_mes.append(matriz_aux[i, 0])
+            contribs.append(contribs_mes)
+        return contribs
+
+    def verifica_contrib_negativa(self,
+                                  ordens: np.ndarray,
+                                  contribs: List[List[float]]) -> list:
+        """
+        """
+        contrib_negativa: List[int] = []
+        for i, contrib in enumerate(contribs):
+            ordem = ordens[i]
+            for j in range(ordem):
+                if contrib[j] < 0:
+                    contrib_negativa.append(i)
+        return list(set(contrib_negativa))
+
+    def reducao_ordem(self,
+                      ordens_iniciais: np.ndarray,
+                      configs: np.ndarray):
+        """
+        """
+        ordens = deepcopy(ordens_iniciais)
+        ordens_maximas = deepcopy(ordens_iniciais)
+        # Realiza a estimação inicial
+        coefs_estimados = self.estima_modelo(ordens, configs)
+        # Calcula as contribuições a partir dos desvios
+        contribs = self.contribuicoes(coefs_estimados)
+        contrib_negativa = self.verifica_contrib_negativa(ordens,
+                                                          contribs)
+        while True:
+            # Se não foi encontrada nenhuma contribuição negativa,
+            # então termina o loop.
+            if len(contrib_negativa) == 0:
+                break
+            # Senão, reduz a ordem do mês que teve contribuição negativa
+            # em 1 e tenta novamente.
+            for mes in contrib_negativa:
+                ordens_maximas[mes] -= 1
+            # Realiza a escolha da ordem, limitado às ordens máximas
+            for p in range(self.periodos):
+                ordens[p] = self.escolhe_ordem_modelo(p,
+                                                      ordens_maximas[p],
+                                                      configs)
+            coefs_estimados = self.estima_modelo(ordens, configs)
+            contribs = self.contribuicoes(coefs_estimados)
+            contrib_negativa = self.verifica_contrib_negativa(ordens,
+                                                              contribs)
+        return ordens, contribs
 
 
 class YuleWalkerPARA:
@@ -445,11 +571,26 @@ class YuleWalkerPARA:
                                          col_p - o))
         return ccruz
 
+    def escolhe_ordem_modelo(self,
+                             p: int,
+                             max_ordem: int,
+                             configs: np.ndarray) -> int:
+        """
+        """
+        interv_conf = 1.96/np.sqrt(self.n_amostras)
+        serie_facp = self.facp(p, 11, configs)
+        ordem = 1
+        for i in range(max_ordem):
+            if abs(serie_facp[i]) >= interv_conf:
+                ordem = i + 1
+        return ordem
+
     def contribuicoes(self,
                       coefs: List[List[float]]):
         """
         """
-        fis_psi: List[List[float]] = []
+        fis: List[List[float]] = []
+        psis: List[float] = []
         n_meses = len(coefs)
         max_lag = 11
         # Para cada mês, calcula os fis
@@ -457,63 +598,53 @@ class YuleWalkerPARA:
         for p in range(len(coefs)):
             coefs_mes = coefs[p]
             ordem_mes = len(coefs_mes) - 1
-            contribs_mes: List[float] = []
+            fis_mes: List[float] = []
             desv_mes = self.desvios_sinal[p + 12]
             # Calcula a contribuição da média
             desv_media = self.desvios_medias[p]
             contrib_media = coefs_mes[-1] * desv_mes / desv_media
+            psis.append(contrib_media)
             # Para cada coeficiente, calcula a contribuição própria
             for i in range(ordem_mes):
                 desv_lag = self.desvios_sinal[p + 12 - (i + 1)]
                 contrib = coefs_mes[i] * desv_mes / desv_lag
-                contribs_mes.append(contrib)
-            contribs_mes.append(contrib_media)
+                fis_mes.append(contrib)
             # Completa com 0s até ter 12 termos
-            contribs_mes += [0] * (12 - len(contribs_mes))
-            fis_psi.append(contribs_mes)
-        for i in range(len(fis_psi)):
-            print(f"Mês {i + 1} = {fis_psi[i][:-1]}")
+            fis_mes += [0] * (12 - len(fis_mes))
+            fis.append(fis_mes)
+
         contribs: List[List[float]] = []
         # Para cada mês, compôe as contribuições da maneira recursiva
-        for p in range(len(coefs)):
+        for p in range(n_meses):
             matriz_aux = np.zeros((max_lag, n_meses))
             # Atribui a primeira linha da matriz auxiliar com os fis,
             # já somados com as contribuições das suas médias
             for j in range(n_meses):
-                matriz_aux[0, j] = fis_psi[p][j]+ fis_psi[p][-1] / 12
+                matriz_aux[0, j] = fis[p][j] + psis[p] / 12
             contribs_mes = [matriz_aux[0, 0]]
             # Para cada coeficiente, adiciona as contribuições recursivas
             for i in range(1, max_lag):
                 aux = (p - i) % n_meses
                 for j in range(max_lag):
-                    contrib_aux = fis_psi[aux][j] + fis_psi[aux][-1] / 12
-                    # TALVEZ ESSE j QUE INDEXA O FI DO MÊS AUXILIAR
-                    # ESTEJA ERRADO. 
+                    contrib_aux = fis[aux][j] + psis[aux] / 12
                     matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
                                         + matriz_aux[i - 1, j + 1])
                 contribs_mes.append(matriz_aux[i, 0])
             contribs.append(contribs_mes)
-        print(contribs[5])
         return contribs
 
     def verifica_contrib_negativa(self,
                                   ordens: np.ndarray,
-                                  contribs: List[List[float]]) -> dict:
+                                  contribs: List[List[float]]) -> list:
         """
         """
-        contrib_negativa = {i: 0 for i in range(1, 13)}
+        contrib_negativa: List[int] = []
         for i, contrib in enumerate(contribs):
             ordem = ordens[i]
             for j in range(ordem):
                 if contrib[j] < 0:
-                    if (contrib_negativa[i + 1] != 0 and
-                            contrib_negativa[i + 1] <= j):
-                        continue
-                    str_log = ("Contribuição do coef de ordem"
-                               + f" {j + 1} no mês {i + 1} é negativa")
-                    print(str_log)
-                    contrib_negativa[i + 1] = j
-        return contrib_negativa
+                    contrib_negativa.append(i)
+        return list(set(contrib_negativa))
  
     def reducao_ordem(self,
                       ordens_iniciais: np.ndarray,
@@ -521,6 +652,7 @@ class YuleWalkerPARA:
         """
         """
         ordens = deepcopy(ordens_iniciais)
+        ordens_maximas = deepcopy(ordens_iniciais)
         # Realiza a estimação inicial
         coefs_estimados = self.estima_modelo(ordens, configs)
         # Calcula as contribuições a partir dos desvios
@@ -530,19 +662,19 @@ class YuleWalkerPARA:
         while True:
             # Se não foi encontrada nenhuma contribuição negativa,
             # então termina o loop.
-            if not any(list(contrib_negativa.values())):
+            if len(contrib_negativa) == 0:
                 break
             # Senão, reduz a ordem do mês que teve contribuição negativa
             # em 1 e tenta novamente.
-            for mes, ord in contrib_negativa.items():
-                if ord != 0:
-                    ordens[mes - 1] -= 1
-            # print(f"Estimando com as ordens  {ordens}")
+            for mes in contrib_negativa:
+                ordens_maximas[mes] -= 1
+            # Realiza a escolha da ordem, limitado às ordens máximas
+            for p in range(self.periodos):
+                ordens[p] = self.escolhe_ordem_modelo(p,
+                                                      ordens_maximas[p],
+                                                      configs)
             coefs_estimados = self.estima_modelo(ordens, configs)
             contribs = self.contribuicoes(coefs_estimados)
             contrib_negativa = self.verifica_contrib_negativa(ordens,
                                                               contribs)
-        # print("Contribs")
-        # print(contribs)
-        # Retorna as ordens finais
         return ordens, contribs

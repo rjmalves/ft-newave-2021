@@ -26,15 +26,20 @@
 #
 # 6- Observar a saída exibida no terminal.
 
+from inewave.newave.pmo import LeituraPMO  # type: ignore
 from inewave.newave.parp import LeituraPARp  # type: ignore
 from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
+from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
 diretorio_parpa = ("/home/rogerio/ONS/validacao_newave2743" +
                    "/pmo_2020_11_parpa_sem_redordem")
+
+# Lê o arquivo pmo.dat
+pmo = LeituraPMO(diretorio_parpa).le_arquivo()
 
 # Lê o arquivo parp.dat
 parp = LeituraPARp(diretorio_parpa).le_arquivo()
@@ -61,17 +66,26 @@ interv_conf = 1.96/np.sqrt(len(parp.anos_historico))
 for ree in IDS_REES:
     print("Escolhendo ordens dos modelos para REE" +
           f" {ree} - {REES[ree - 1]}")
-    serie_facp = parp.correlograma_energia_ree(ree)
+    series_energia = parp.series_energia_ree(ree)
+    yw = YuleWalkerPARA(series_energia)
     mes = 1
     for a, ano in enumerate(parp.anos_estudo):
         ordens_finais = parp.ordens_finais_ree(ree)[ano]
+        # Gera a tabela das configurações do ano anterior e do atual
+        cfgs = pmo.configuracoes_entrada_reservatorio
+        if a == 0:
+            c_atual = cfgs.configs_por_ano[ano]
+            c_ant = list(np.ones_like(c_atual, dtype=np.int64))
+            configs = np.array([c_ant, c_atual])
+        else:
+            a_ant = parp.anos_estudo[a - 1]
+            c_ant = cfgs.configs_por_ano[a_ant]
+            c_atual = cfgs.configs_por_ano[ano]
+            configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
             # Atualiza as variáveis com as máximas diferenças
-            ordem = 1
-            for i in range(6):
-                if abs(serie_facp[mes][i]) >= interv_conf:
-                    ordem = i + 1
-            dif = abs(ordem != ordens_finais[p])
+            ordem = yw.escolhe_ordem_modelo(p, 6, configs)
+            dif = abs(ordem - ordens_finais[p])
             if dif > n_dif_ree[ree]:
                 n_dif_ree[ree] = dif
                 ano_n_dif_ree[ree] = ano

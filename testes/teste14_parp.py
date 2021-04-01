@@ -31,17 +31,17 @@ from inewave.newave.parp import LeituraPARp  # type: ignore
 from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
-from parpa.yulewalker import YuleWalkerPARA
+from parpa.yulewalker import YuleWalkerPAR
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "/home/rogerio/ONS/validacao_newave2744/pmo_2020_11_parpa"
+diretorio_parp = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_oficial"
 
 # Lê o arquivo pmo.dat
-pmo = LeituraPMO(diretorio_parpa).le_arquivo()
+pmo = LeituraPMO(diretorio_parp).le_arquivo()
 
 # Lê o arquivo parp.dat
-parp = LeituraPARp(diretorio_parpa).le_arquivo()
+parp = LeituraPARp(diretorio_parp).le_arquivo()
 
 # Realiza a verificação de igualdade para todas as
 # configurações de todas as REEs.
@@ -49,7 +49,7 @@ parp = LeituraPARp(diretorio_parpa).le_arquivo()
 # Variáveis auxiliares para armazenar valores
 IDS_REES = range(1, len(REES) + 1)
 # Máxima diferença absoluta por REE
-max_dif_ree: Dict[int, float] = {ree: 0
+max_dif_ree: Dict[int, float] = {ree: -1e4
                                  for ree in IDS_REES}
 ano_max_dif_ree: Dict[int, int] = {ree: 0
                                    for ree in IDS_REES}
@@ -67,7 +67,7 @@ coef_e_max_dif_ree: Dict[int, float] = {ree: 0
 for ree in IDS_REES:
     print(f"Reduzindo ordens para REE {ree} - {REES[ree - 1]}")
     series_energia = parp.series_energia_ree(ree)
-    yw = YuleWalkerPARA(series_energia)
+    yw = YuleWalkerPAR(series_energia)
     contribs = parp.contribuicoes_ree(ree)
     mes = 0
     # for a, ano in enumerate([2020]):

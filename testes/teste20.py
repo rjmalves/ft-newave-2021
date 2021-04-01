@@ -47,8 +47,8 @@ from typing import List, Dict
 
 # Variáveis auxiliares com os diretorios dos casos
 dir_base = "/home/rogerio/ONS/validacao_newave2745/"
-dir_oficial_parp = dir_base + "pmo_2021_01_sul_100_mlt_parp"
-dir_oficial_parpa = dir_base + "pmo_2021_01_sul_100_mlt_parpa"
+dir_sul100_parp = dir_base + "pmo_2021_01_sul_100_mlt_parp"
+dir_sul100_parpa = dir_base + "pmo_2021_01_sul_100_mlt_parpa"
 dir_sul50_parp = dir_base + "pmo_2021_01_sul_50_mlt_parp"
 dir_sul50_parpa = dir_base + "pmo_2021_01_sul_50_mlt_parpa"
 dir_sul150_parp = dir_base + "pmo_2021_01_sul_150_mlt_parp"
@@ -135,8 +135,8 @@ anos = [2021, 2022, 2023, 2024, 2025]
 meses = list(range(12))
 
 # # Lê os arquivos MEDIAS-MERC
-medias_oficial_parp = LeituraMediasMerc(dir_oficial_parp).le_arquivo()
-medias_oficial_parpa = LeituraMediasMerc(dir_oficial_parpa).le_arquivo()
+medias_oficial_parp = LeituraMediasMerc(dir_sul100_parp).le_arquivo()
+medias_oficial_parpa = LeituraMediasMerc(dir_sul100_parpa).le_arquivo()
 medias_sul50_parp = LeituraMediasMerc(dir_sul50_parp).le_arquivo()
 medias_sul50_parpa = LeituraMediasMerc(dir_sul50_parpa).le_arquivo()
 medias_sul150_parp = LeituraMediasMerc(dir_sul150_parp).le_arquivo()
@@ -348,8 +348,8 @@ grafico_ena([medias_sul50_parp,
 #              "saidas/teste20_earm.png")
 
 # Lê os arquivos eafbm00x
-eafbm_oficial_parp = LeituraEafbm00(dir_oficial_parp).le_arquivos()
-eafbm_oficial_parpa = LeituraEafbm00(dir_oficial_parpa).le_arquivos()
+eafbm_oficial_parp = LeituraEafbm00(dir_sul100_parp).le_arquivos()
+eafbm_oficial_parpa = LeituraEafbm00(dir_sul100_parpa).le_arquivos()
 eafbm_sul50_parp = LeituraEafbm00(dir_sul50_parp).le_arquivos()
 eafbm_sul50_parpa = LeituraEafbm00(dir_sul50_parpa).le_arquivos()
 eafbm_sul150_parp = LeituraEafbm00(dir_sul150_parp).le_arquivos()
