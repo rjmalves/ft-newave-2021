@@ -61,19 +61,6 @@ coef_o_max_dif_ree: Dict[int, float] = {ree: 0
                                         for ree in IDS_REES}
 coef_e_max_dif_ree: Dict[int, float] = {ree: 0
                                         for ree in IDS_REES}
-# Máxima diferença percentual por REE
-max_dif_percent_ree: Dict[int, float] = {ree: -1e4
-                                         for ree in IDS_REES}
-ano_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                        for ree in IDS_REES}
-periodo_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                            for ree in IDS_REES}
-ordem_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                          for ree in IDS_REES}
-coef_o_max_dif_perc_ree: Dict[int, float] = {ree: 0
-                                             for ree in IDS_REES}
-coef_e_max_dif_perc_ree: Dict[int, float] = {ree: 0
-                                             for ree in IDS_REES}
 
 
 # Faz a estimação para as ordens iniciais do modelo PAR(p)-A
@@ -83,8 +70,8 @@ for ree in [1]:
     yw = YuleWalkerPARA(series_energia)
     contribs = parp.contribuicoes_ree(ree)
     mes = 0
-    for a, ano in enumerate(parp.anos_estudo):
-        print(f"Ano {ano}")
+    for a, ano in enumerate([2020]):
+    # for a, ano in enumerate(parp.anos_estudo):
         ordens_originais = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
@@ -98,65 +85,39 @@ for ree in [1]:
             c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         # Calcula as ordens finais partindo das ordens inciais
-        # print(f"Ordens originais:        {ordens_originais}")
         ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais, configs)
+        ordens = parp.ordens_finais_ree(ree)[ano]
+        print(f"Ordens originais:        {ordens_originais}")
         print(f"Ordens finais estimadas: {ordens_finais}")
-        print(f"Ordens finais NEWAVE:    {parp.ordens_finais_ree(ree)[ano]}")
+        print(f"Ordens finais NEWAVE:    {ordens}")
         # Atualiza as variáveis com as máximas diferenças
         # print(contribs_estimadas)
-        for p, contribs_p in enumerate(contribs_estimadas):
-            for i, c in enumerate(contribs_p):
-                dif = abs(c - contribs[mes][i])
-                dif_percentual = abs(100 * abs(c - contribs[mes][i])
-                                     / contribs[p][i])
-                if dif > max_dif_ree[ree]:
-                    max_dif_ree[ree] = dif
+        for m, o in enumerate(ordens_finais):
+            dif = abs(o - ordens[m])
+            if dif > max_dif_ree[ree]:
+                max_dif_ree[ree] = dif
+                if dif > 0:
                     ano_max_dif_ree[ree] = ano
-                    periodo_max_dif_ree[ree] = p + 1
-                    ordem_max_dif_ree[ree] = i + 1
-                    coef_e_max_dif_ree[ree] = c
-                    coef_o_max_dif_ree[ree] = contribs[p][i]
-                if dif_percentual > max_dif_percent_ree[ree]:
-                    max_dif_percent_ree[ree] = dif_percentual
-                    ano_max_dif_perc_ree[ree] = ano
-                    periodo_max_dif_perc_ree[ree] = p + 1
-                    ordem_max_dif_perc_ree[ree] = i + 1
-                    coef_e_max_dif_perc_ree[ree] = c
-                    coef_o_max_dif_perc_ree[ree] = contribs[p][i]
+                    periodo_max_dif_ree[ree] = mes
+                    coef_e_max_dif_ree[ree] = o
+                    coef_o_max_dif_ree[ree] = ordens[m]
             mes += 1
 
 print("")
-print(" REE | MAX. DIF. ABS. | MES | ORDEM |" +
-      "  COEF. OFICIAL | COEF. ESTIMADO")
-print("----------------------------------------" +
+print(" REE | MAX. DIF. |  ANO  | MES |" +
+      "  ORD. OFICIAL | ORD. ESTIMADA")
+print("----------------------------------" +
       "-----------------------------")
 for ree in IDS_REES:
     str_ree = f"{ree}".rjust(2)
-    str_max_dif = "{:1.9f}".format(max_dif_ree[ree]).rjust(10)
+    str_max_dif = f"{max_dif_ree[ree]}".rjust(8)
     str_mes = f"{periodo_max_dif_ree[ree]}".rjust(2)
-    str_ordem = f"{ordem_max_dif_ree[ree]}"
-    str_coef_o = "{:1.6f}".format(coef_o_max_dif_ree[ree]).rjust(12)
-    str_coef_e = "{:1.6f}".format(coef_e_max_dif_ree[ree]).rjust(12)
-    str_linha = f"  {str_ree} |    {str_max_dif} |  {str_mes} | "
-    str_linha += f"    {str_ordem} |   {str_coef_o} |   {str_coef_e}"
+    str_ano = f"{ano_max_dif_ree[ree]}".rjust(4)
+    str_coef_o = f"{coef_o_max_dif_ree[ree]}".rjust(12)
+    str_coef_e = f"{coef_e_max_dif_ree[ree]}".rjust(12)
+    str_linha = f"  {str_ree} | {str_max_dif}  |  {str_ano} | "
+    str_linha += f" {str_mes} |  {str_coef_o} |  {str_coef_e}"
     print(str_linha)
-print("-----------------------------------------" +
+print("-----------------------------------" +
       "----------------------------")
 print("")
-
-print(" REE | MAX. DIF. PERC. | MES | ORDEM |" +
-      "  COEF. OFICIAL | COEF. ESTIMADO")
-print("------------------------------------------" +
-      "----------------------------")
-for ree in IDS_REES:
-    str_ree = f"{ree}".rjust(2)
-    str_max_dif = "{:2.6f}".format(max_dif_percent_ree[ree]).rjust(10)
-    str_mes = f"{periodo_max_dif_perc_ree[ree]}".rjust(2)
-    str_ordem = f"{ordem_max_dif_perc_ree[ree]}"
-    str_coef_o = "{:1.6f}".format(coef_o_max_dif_perc_ree[ree]).rjust(12)
-    str_coef_e = "{:1.6f}".format(coef_e_max_dif_perc_ree[ree]).rjust(12)
-    str_linha = f"  {str_ree} |      {str_max_dif} |  {str_mes} | "
-    str_linha += f"    {str_ordem} |   {str_coef_o} |   {str_coef_e}"
-    print(str_linha)
-print("------------------------------------------" +
-      "----------------------------")

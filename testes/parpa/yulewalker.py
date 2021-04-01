@@ -451,6 +451,7 @@ class YuleWalkerPARA:
         """
         fis_psi: List[List[float]] = []
         n_meses = len(coefs)
+        max_lag = 11
         # Para cada mês, calcula os fis
         # de cada coeficiente e o psi
         for p in range(len(coefs)):
@@ -465,51 +466,58 @@ class YuleWalkerPARA:
             for i in range(ordem_mes):
                 desv_lag = self.desvios_sinal[p + 12 - (i + 1)]
                 contrib = coefs_mes[i] * desv_mes / desv_lag
-                contrib += contrib_media / 12
                 contribs_mes.append(contrib)
             contribs_mes.append(contrib_media)
             fis_psi.append(contribs_mes)
         
         contribs: List[List[float]] = []
-        matriz_aux = np.zeros((n_meses, 11))
-        # Para o primeiro mês, é igual aos fis e psi
+        matriz_aux = np.zeros((max_lag, n_meses))
         # Para cada mês, compôe as contribuições da maneira recursiva
         for p in range(len(coefs)):
-            contribs_mes = deepcopy(fis_psi[p])
-            ordem_mes = len(contribs_mes) - 1
+            ordem_mes = len(fis_psi[p]) - 1
             # Atribui a primeira linha da matriz auxiliar com os fis,
             # já somados com as contribuições das suas médias
-            for i in range(ordem_mes):
-                matriz_aux[0, i] = contribs_mes[i]
-
+            for j in range(max_lag):
+                matriz_aux[0, j] = (fis_psi[p][j] if j < ordem_mes
+                                    else 0.0)
+            for j in range(n_meses):
+                matriz_aux[0, j] = matriz_aux[0, j] + fis_psi[p][-1] / 12
+            contribs_mes = [matriz_aux[0, 0]]
             # Para cada coeficiente, adiciona as contribuições recursivas
-            for i in range(1, ordem_mes):
-                for j in range(i):
-                    ordem_modelo_lag = len(fis_psi[p - (j + 1)]) - 1
-                    if i - j > ordem_modelo_lag:
-                        continue
-                    print(f"Adicionou contrib do mês {p - j} ordem {i - j} no mês {p + 1} ordem {i + 1}")
-                    contribs_mes[i] = (contribs_mes[i] * fis_psi[p - (j + 1)][i - (j + 1)]
-                                       + 0)
+            for i in range(1, max_lag):
+                aux = (p - i) % n_meses
+                ordem_mes_aux = len(fis_psi[aux]) - 1
+                for j in range(max_lag):
+                    contrib_aux = fis_psi[aux][-1] / 12
+                    # TALVEZ ESSE j QUE INDEXA O FI DO MÊS AUXILIAR
+                    # ESTEJA ERRADO. 
+                    if j < ordem_mes_aux:
+                        contrib_aux += fis_psi[aux][j]
+                    matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
+                                        + matriz_aux[i - 1, j + 1])
+                contribs_mes.append(matriz_aux[i, 0])
             contribs.append(contribs_mes)
+        print(contribs[5])
         return contribs
 
     def verifica_contrib_negativa(self,
                                   ordens: np.ndarray,
-                                  contribs: List[List[float]]) -> int:
+                                  contribs: List[List[float]]) -> dict:
         """
         """
-        contrib_negativa = []
+        contrib_negativa = {i: 0 for i in range(1, 13)}
         for i, contrib in enumerate(contribs):
             ordem = ordens[i]
             for j in range(ordem):
                 if contrib[j] < 0:
+                    if (contrib_negativa[i + 1] != 0 and
+                            contrib_negativa[i + 1] <= j):
+                        continue
                     str_log = ("Contribuição do coef de ordem"
                                + f" {j + 1} no mês {i + 1} é negativa")
                     print(str_log)
-                    print(contrib)
-                    contrib_negativa.append(i + 1)
-        return list(set(contrib_negativa))
+                    contrib_negativa[i + 1] = j
+        return contrib_negativa
  
     def reducao_ordem(self,
                       ordens_iniciais: np.ndarray,
@@ -526,13 +534,14 @@ class YuleWalkerPARA:
         while True:
             # Se não foi encontrada nenhuma contribuição negativa,
             # então termina o loop.
-            if len(contrib_negativa) == 0:
+            if not any(list(contrib_negativa.values())):
                 break
             # Senão, reduz a ordem do mês que teve contribuição negativa
             # em 1 e tenta novamente.
-            for mes in contrib_negativa:
-                ordens[mes - 1] -= 1
-            print(f"Estimando com as ordens  {ordens}")
+            for mes, ord in contrib_negativa.items():
+                if ord != 0:
+                    ordens[mes - 1] = ord
+            # print(f"Estimando com as ordens  {ordens}")
             coefs_estimados = self.estima_modelo(ordens, configs)
             contribs = self.contribuicoes(coefs_estimados)
             contrib_negativa = self.verifica_contrib_negativa(ordens,
