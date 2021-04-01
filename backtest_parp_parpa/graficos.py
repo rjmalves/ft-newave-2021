@@ -208,7 +208,7 @@ def grafico_gt_subsistema(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
-    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    max_y = 0.0
     min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
 
@@ -224,7 +224,7 @@ def grafico_gt_subsistema(casos: List[Caso],
             x = list(range(caso.n_revs))
             y = caso.gt_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
-            max_y[sub] = max([max_y[sub]] + list(y))
+            max_y = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
