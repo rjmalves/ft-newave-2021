@@ -180,7 +180,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
                 np.array(casos[1].earm_subsis[sub]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h, = twins[subx][suby].stem(x, difs,
+        h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
                                    basefmt='none',
@@ -268,7 +268,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
                 np.array(casos[1].gt_subsis[sub][1:]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h, = twins[subx][suby].stem(x, difs,
+        h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
                                    basefmt='none',
