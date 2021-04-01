@@ -241,8 +241,7 @@ def grafico_gt_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(0, max([max_y[s]
-                                         for s in SUBSISTEMAS]))
+        axs[subx, suby].set_ylim(0, max_y)
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
