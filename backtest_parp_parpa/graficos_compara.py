@@ -101,7 +101,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
                 np.array(casos[1].cmo_subsis[sub][1:]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h, = twins[subx][suby].stem(x, difs,
+        h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
                                    basefmt='none',

@@ -154,7 +154,7 @@ def grafico_earm_subsistema(casos: List[Caso],
             max_y[sub] = max([max_y[sub]] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
+            h, = axs[subx, suby].plot(x, y,
                                      linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
