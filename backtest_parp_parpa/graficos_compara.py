@@ -89,7 +89,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
+            h, = axs[subx, suby].plot(x, y,
                                      linewidth=3,
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
@@ -101,7 +101,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
                 np.array(casos[1].cmo_subsis[sub][1:]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
+        h, = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
                                    basefmt='none',
@@ -121,7 +121,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
         twins[subx][suby].set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -168,7 +168,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
+            h, = axs[subx, suby].plot(x, y,
                                      linewidth=3,
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
@@ -180,7 +180,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
                 np.array(casos[1].earm_subsis[sub]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
+        h, = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
                                    basefmt='none',
@@ -190,7 +190,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         # Faz o plot do vminp para o subsistema
         x = range(max_x + 1)
         y = [vminp[sub]] * len(x)
-        h = axs[subx, suby].plot(x, y,
+        h, = axs[subx, suby].plot(x, y,
                              linewidth=2,
                              linestyle="dashed",
                              color="red",
@@ -209,7 +209,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         twins[subx][suby].set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -256,7 +256,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
+            h, = axs[subx, suby].plot(x, y,
                                      linewidth=3,
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
@@ -268,7 +268,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
                 np.array(casos[1].gt_subsis[sub][1:]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
+        h, = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
                                    basefmt='none',
@@ -288,7 +288,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
         twins[subx][suby].set_ylim(-2*max_y_dif, 2*max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -304,9 +304,9 @@ def grafico_earm_sin_dif(casos: List[Caso],
                          dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(figsize=(10, 5))
-    plt.title("Evolução do Armazenamento para o SIN",
+    axs.set_title("Evolução do Armazenamento para o SIN",
               fontsize=14)
-    plt.ylabel('EARM (% EARMax)')
+    axs.set_ylabel('EARM (% EARMax)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
     max_y_dif = 0.0
@@ -322,15 +322,15 @@ def grafico_earm_sin_dif(casos: List[Caso],
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
         # Faz o plot
-        h = plt.plot(x, y,
+        h, = axs.plot(x, y,
                      linewidth=3,
                      linestyle=TIPOS[c],
                      color=CORES[c],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
-    plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+    fig.legend(handlers_legendas,
+               [c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
                loc="lower center",
                borderaxespad=0,
@@ -348,12 +348,12 @@ def grafico_earm_sin_dif(casos: List[Caso],
               basefmt='none')
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(0, 100)
+    axs.set_xlim(0, max_x)
+    axs.set_ylim(0, 100)
     twin.set_ylim(-2*max_y_dif, 2*max_y_dif)
-    plt.xticks(x_ticks + [max_x],
-               [""] + x_labels,
-               fontsize=9)
+    axs.set_xticks(x_ticks + [max_x])
+    axs.set_xticklabels([""] + x_labels,
+                        fontsize=9)
     plt.tight_layout()
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
@@ -366,9 +366,9 @@ def grafico_gt_sin_dif(casos: List[Caso],
                        dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(figsize=(10, 5))
-    plt.title("Evolução da Geração Térmica para o SIN",
+    axs.set_title("Evolução da Geração Térmica para o SIN",
               fontsize=14)
-    plt.ylabel('GT (MWmed)')
+    axs.set_ylabel('GT (MWmed)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
     max_y_dif = 0.0
@@ -384,7 +384,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
         # Faz o plot
-        h = plt.plot(x, y,
+        h, = axs.plot(x, y,
                      linewidth=3,
                      linestyle=TIPOS[c],
                      color=CORES[c],
@@ -392,8 +392,8 @@ def grafico_gt_sin_dif(casos: List[Caso],
                      label=caso.nome)
         handlers_legendas.append(h)
     
-    plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+    fig.legend(handlers_legendas,
+               [c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
                loc="lower center",
                borderaxespad=0,
@@ -420,11 +420,12 @@ def grafico_gt_sin_dif(casos: List[Caso],
                  label="Meta CMSE")
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
-    plt.xlim(0, max_x)
-    plt.ylim(min_y, max_y)
+    axs.set_xlim(0, max_x)
+    axs.set_ylim(min_y, max_y)
     twin.set_ylim(-2*max_y_dif, 2*max_y_dif)
-    plt.xticks(x_ticks, x_labels,
-               fontsize=9)
+    axs.set_xticks(x_ticks)
+    axs.set_xticklabels(x_labels,
+                        fontsize=9)
     plt.tight_layout()
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)

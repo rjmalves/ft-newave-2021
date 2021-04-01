@@ -164,7 +164,7 @@ def grafico_earm_subsistema(casos: List[Caso],
         # Faz o plot do vminp para o subsistema
         x = range(max_x + 2)
         y = [vminp[sub]] * len(x)
-        h = axs[subx, suby].plot(x, y,
+        h, = axs[subx, suby].plot(x, y,
                              linewidth=2,
                              linestyle="dashed",
                              color="red",
@@ -187,7 +187,7 @@ def grafico_earm_subsistema(casos: List[Caso],
         axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=5)
@@ -227,7 +227,7 @@ def grafico_gt_subsistema(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
+            h, = axs[subx, suby].plot(x, y,
                                      linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
@@ -251,7 +251,7 @@ def grafico_gt_subsistema(casos: List[Caso],
         axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=5)
@@ -405,7 +405,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
+            h, = axs[subx, suby].plot(x, y,
                                      linewidth=LARGURAS[c],
                                      linestyle=TIPOS[c],
                                      color=CORES[c],
