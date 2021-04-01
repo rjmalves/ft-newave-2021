@@ -9,8 +9,8 @@ from caso import SUBSISTEMAS  # type: ignore
 
 CORES = [
          "black",
-         "lightsalmon",
-         "lightsalmon"
+         "springgreen",
+         "springgreen"
          ]
 
 TIPOS = [
@@ -104,7 +104,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
         h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
-                                   basefmt='none',
+                                   basefmt='grey',
                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
@@ -183,7 +183,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
-                                   basefmt='none',
+                                   basefmt='grey',
                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
@@ -271,7 +271,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
         h = twins[subx][suby].stem(x, difs,
                                    linefmt='grey',
                                    markerfmt='none',
-                                   basefmt='none',
+                                   basefmt='grey',
                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
@@ -329,13 +329,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
-    fig.legend(handlers_legendas,
-               [c.nome for c in casos],
-               bbox_to_anchor=(0.462, -0.18),
-               loc="lower center",
-               borderaxespad=0,
-               ncol=len(casos),
-               fontsize=9)
+
     # Calcula as diferenças
     difs = (np.array(casos[2].earm_sin) -
             np.array(casos[1].earm_sin))
@@ -345,7 +339,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
     twin.stem(x, difs,
               linefmt='grey',
               markerfmt='none',
-              basefmt='none')
+              basefmt='grey')
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
     axs.set_xlim(0, max_x)
@@ -355,6 +349,13 @@ def grafico_earm_sin_dif(casos: List[Caso],
     axs.set_xticklabels([""] + x_labels,
                         fontsize=9)
     plt.tight_layout()
+    fig.legend(handlers_legendas,
+            [c.nome for c in casos],
+            bbox_to_anchor=(0.462, -0.18),
+            loc="lower center",
+            borderaxespad=0,
+            ncol=len(casos),
+            fontsize=9)
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(dir_saida,
@@ -392,13 +393,6 @@ def grafico_gt_sin_dif(casos: List[Caso],
                      label=caso.nome)
         handlers_legendas.append(h)
     
-    fig.legend(handlers_legendas,
-               [c.nome for c in casos],
-               bbox_to_anchor=(0.462, -0.18),
-               loc="lower center",
-               borderaxespad=0,
-               ncol=len(casos),
-               fontsize=9)
     # Calcula as diferenças
     difs = (np.array(casos[2].gt_sin[1:]) -
             np.array(casos[1].gt_sin[1:]))
@@ -408,7 +402,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
     twin.stem(x, difs,
               linefmt='grey',
               markerfmt='none',
-              basefmt='none')
+              basefmt='grey')
     # Faz o plot da meta GT para o subsistema
     x = range(max_x + 1)
     y = [15000] * len(x)
@@ -427,6 +421,13 @@ def grafico_gt_sin_dif(casos: List[Caso],
     axs.set_xticklabels(x_labels,
                         fontsize=9)
     plt.tight_layout()
+    fig.legend(handlers_legendas,
+            [c.nome for c in casos],
+            bbox_to_anchor=(0.462, -0.18),
+            loc="lower center",
+            borderaxespad=0,
+            ncol=len(casos),
+            fontsize=9)
     # Salva o arquivo de saída
     plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(dir_saida,
