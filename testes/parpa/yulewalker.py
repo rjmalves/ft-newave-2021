@@ -469,11 +469,12 @@ class YuleWalkerPARA:
                 contribs_mes.append(contrib)
             contribs_mes.append(contrib_media)
             fis_psi.append(contribs_mes)
-        
+        for i in range(len(fis_psi)):
+            print(f"Mês {i + 1} = {fis_psi[i][:-1]}")
         contribs: List[List[float]] = []
-        matriz_aux = np.zeros((max_lag, n_meses))
         # Para cada mês, compôe as contribuições da maneira recursiva
         for p in range(len(coefs)):
+            matriz_aux = np.zeros((max_lag, n_meses))
             ordem_mes = len(fis_psi[p]) - 1
             # Atribui a primeira linha da matriz auxiliar com os fis,
             # já somados com as contribuições das suas médias
@@ -540,7 +541,7 @@ class YuleWalkerPARA:
             # em 1 e tenta novamente.
             for mes, ord in contrib_negativa.items():
                 if ord != 0:
-                    ordens[mes - 1] = ord
+                    ordens[mes - 1] -= 1
             # print(f"Estimando com as ordens  {ordens}")
             coefs_estimados = self.estima_modelo(ordens, configs)
             contribs = self.contribuicoes(coefs_estimados)
