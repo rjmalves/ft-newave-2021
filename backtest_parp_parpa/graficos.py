@@ -386,7 +386,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='Deficit (MWmed)')
     # Variáveis para limitar os eixos no futuro
-    max_y = {s: 0.0 for s in SUBSISTEMAS}
+    max_y = 0.0
     min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
 
@@ -402,7 +402,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
             x = list(range(caso.n_revs + 1))
             y = caso.def_subsis[sub]
             max_x = max([len(x) - 1, max_x])
-            max_y[sub] = max([max_y[sub]] + list(y))
+            max_y[sub] = max([max_y] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h = axs[subx, suby].plot(x, y,
@@ -419,7 +419,7 @@ def grafico_deficit_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(0, max_y[sub])
+        axs[subx, suby].set_ylim(0, max_y)
         axs[subx, suby].set_xticks(x_ticks + [max_x])
         axs[subx, suby].set_xticklabels([""] + x_labels,
                                         fontsize=9)
