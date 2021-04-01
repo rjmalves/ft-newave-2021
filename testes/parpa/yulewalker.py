@@ -468,6 +468,8 @@ class YuleWalkerPARA:
                 contrib = coefs_mes[i] * desv_mes / desv_lag
                 contribs_mes.append(contrib)
             contribs_mes.append(contrib_media)
+            # Completa com 0s até ter 12 termos
+            contribs_mes += [0] * (12 - len(contribs_mes))
             fis_psi.append(contribs_mes)
         for i in range(len(fis_psi)):
             print(f"Mês {i + 1} = {fis_psi[i][:-1]}")
@@ -475,25 +477,18 @@ class YuleWalkerPARA:
         # Para cada mês, compôe as contribuições da maneira recursiva
         for p in range(len(coefs)):
             matriz_aux = np.zeros((max_lag, n_meses))
-            ordem_mes = len(fis_psi[p]) - 1
             # Atribui a primeira linha da matriz auxiliar com os fis,
             # já somados com as contribuições das suas médias
-            for j in range(max_lag):
-                matriz_aux[0, j] = (fis_psi[p][j] if j < ordem_mes
-                                    else 0.0)
             for j in range(n_meses):
-                matriz_aux[0, j] = matriz_aux[0, j] + fis_psi[p][-1] / 12
+                matriz_aux[0, j] = fis_psi[p][j]+ fis_psi[p][-1] / 12
             contribs_mes = [matriz_aux[0, 0]]
             # Para cada coeficiente, adiciona as contribuições recursivas
             for i in range(1, max_lag):
                 aux = (p - i) % n_meses
-                ordem_mes_aux = len(fis_psi[aux]) - 1
                 for j in range(max_lag):
-                    contrib_aux = fis_psi[aux][-1] / 12
+                    contrib_aux = fis_psi[aux][j] + fis_psi[aux][-1] / 12
                     # TALVEZ ESSE j QUE INDEXA O FI DO MÊS AUXILIAR
                     # ESTEJA ERRADO. 
-                    if j < ordem_mes_aux:
-                        contrib_aux += fis_psi[aux][j]
                     matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
                                         + matriz_aux[i - 1, j + 1])
                 contribs_mes.append(matriz_aux[i, 0])
