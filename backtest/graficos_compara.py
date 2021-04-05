@@ -265,11 +265,11 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
                 np.array(casos[0].gt_subsis[sub][1:]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h, = twins[subx][suby].stem(x, difs,
-                                    linefmt='grey',
-                                    markerfmt='none',
-                                    basefmt='grey',
-                                    label="Diferença")
+        h = twins[subx][suby].stem(x, difs,
+                                   linefmt='grey',
+                                   markerfmt='none',
+                                   basefmt='grey',
+                                   label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
