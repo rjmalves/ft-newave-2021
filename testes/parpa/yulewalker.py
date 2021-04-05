@@ -641,7 +641,6 @@ class YuleWalkerPARA:
                                         + matriz_aux[i - 1, j + 1])
                 contribs_mes.append(matriz_aux[i, 0])
             contribs.append(contribs_mes)
-        print(contribs[-1][:6])
         return contribs
 
     def verifica_contrib_negativa(self,
@@ -654,7 +653,6 @@ class YuleWalkerPARA:
             ordem = ordens[i]
             for j in range(ordem):
                 if contrib[j] < 0:
-                    print(f"Contrib negativa no mês {i + 1}, ordem {j + 1}")
                     contrib_negativa.append(i)
         return list(set(contrib_negativa))
 

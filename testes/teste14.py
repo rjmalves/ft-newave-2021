@@ -87,11 +87,7 @@ for ree in IDS_REES:
         # Calcula as ordens finais partindo das ordens iniciais
         ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais, configs)
         ordens = parp.ordens_finais_ree(ree)[ano]
-        # print(f"Ordens originais:        {ordens_originais}")
-        # print(f"Ordens finais estimadas: {ordens_finais}")
-        # print(f"Ordens finais NEWAVE:    {ordens}")
         # Atualiza as variáveis com as máximas diferenças
-        # print(contribs_estimadas)
         for m, o in enumerate(ordens_finais):
             dif = abs(o - ordens[m])
             if dif > max_dif_ree[ree]:
