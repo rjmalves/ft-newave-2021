@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def main():
     # Diretórios com as saídas do backtest no formato
     # relato_AAAA_MM.rvX
@@ -42,13 +43,13 @@ def main():
     cvar_25x50 = Caso.constroi_caso_de_pasta(dir_cvar_25x50,
                                              nome)
 
-
     casos = [oficial,
              cvar_50x25,
              cvar_50x35,
              cvar_50x50,
              cvar_25x50
-            ]
+             ]
+
     saida = os.getenv("DIR_SAIDA")
 
     # dir_smap = os.getenv("DIR_SMAP")
@@ -70,6 +71,9 @@ def main():
     grafico_earm_sin(casos, saida)
     # GT para SIN
     grafico_gt_sin(casos, saida)
+
+    # Altera o nome do 50x35 para simplificar
+    cvar_50x35.nome = "VminOP"
 
     casos_cmp = [
                  oficial,
