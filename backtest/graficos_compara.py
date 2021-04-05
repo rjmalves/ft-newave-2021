@@ -206,7 +206,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
         twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -285,7 +285,7 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
         twins[subx][suby].set_ylim(-max_y_dif, max_y_dif)
     plt.tight_layout()
     fig.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                loc="lower center",
                borderaxespad=0.2,
                ncol=len(casos))
@@ -327,7 +327,7 @@ def grafico_earm_sin_dif(casos: List[Caso],
                      label=caso.nome)
         handlers_legendas.append(h)
     plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
                loc="lower center",
                borderaxespad=0,
@@ -390,7 +390,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
         handlers_legendas.append(h)
 
     plt.legend(handlers_legendas,
-               labels=[c.nome for c in casos],
+               [c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),
                loc="lower center",
                borderaxespad=0,
