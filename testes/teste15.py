@@ -88,10 +88,10 @@ for ree in IDS_REES:
             dif = abs(ordem - ordens_finais[p])
             if dif > n_dif_ree[ree]:
                 n_dif_ree[ree] = dif
-                ano_n_dif_ree[ree] = ano
-                periodo_n_dif_ree[ree] = p + 1
-                ordem_n_dif_ree[ree] = ordens_finais[p]
-                signi_n_dif_ree[ree] = ordem
+            ano_n_dif_ree[ree] = ano
+            periodo_n_dif_ree[ree] = p + 1
+            ordem_n_dif_ree[ree] = ordens_finais[p]
+            signi_n_dif_ree[ree] = ordem
             mes += 1
 
 print("")

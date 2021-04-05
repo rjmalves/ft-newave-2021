@@ -77,7 +77,7 @@ def main():
         exporta_dados(c, saida)
 
     # Altera o nome do 50x35 para simplificar
-    cvar_50x35.nome = "VminOP"
+    cvar_50x35.nome = "VminOP + PAR(p)-A"
 
     casos_cmp = [
                  oficial,

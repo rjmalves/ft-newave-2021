@@ -92,11 +92,10 @@ for ree in IDS_REES:
             dif = abs(o - ordens[m])
             if dif > max_dif_ree[ree]:
                 max_dif_ree[ree] = dif
-                if dif > 0:
-                    ano_max_dif_ree[ree] = ano
-                    periodo_max_dif_ree[ree] = mes + 1
-                    coef_e_max_dif_ree[ree] = o
-                    coef_o_max_dif_ree[ree] = ordens[m]
+            ano_max_dif_ree[ree] = ano
+            periodo_max_dif_ree[ree] = mes + 1
+            coef_e_max_dif_ree[ree] = o
+            coef_o_max_dif_ree[ree] = ordens[m]
             mes += 1
 
 print("")
