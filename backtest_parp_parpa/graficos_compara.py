@@ -10,14 +10,15 @@ from caso import SUBSISTEMAS  # type: ignore
 CORES = [
          "black",
          "springgreen",
-         "springgreen"
+         "lightsalmon"
          ]
 
 TIPOS = [
          "solid",
-         "dashed",
+         "solid",
          "solid"
         ]
+
 
 def xticks_graficos() -> Tuple[List[int], List[str]]:
     """
