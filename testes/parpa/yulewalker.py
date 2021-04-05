@@ -626,13 +626,22 @@ class YuleWalkerPARA:
             for i in range(1, max_lag):
                 aux = (p - i) % n_meses
                 for j in range(max_lag):
-                    # Sem somar 1 / 12 da contribuição da média no aux
-                    # abaixo, os resultados ficam idênticos ao NEWAVE
+                    # Na verdade, era primeiro multiplicado matriz_aux
+                    # por fi, chamado de tmp,
+                    # e o valor acumulado era tmp * (1 + psi/12).
+
+                    # Backup do código:
+                    # tmp = matriz_aux[i - 1, 0] * fis[aux][j]
+                    # matriz_aux[i, j] = (tmp
+                    #                     + tmp * psis[aux] / 12
+                    #                     + matriz_aux[i - 1, j + 1])
+
                     contrib_aux = fis[aux][j] + psis[aux] / 12
                     matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
                                         + matriz_aux[i - 1, j + 1])
                 contribs_mes.append(matriz_aux[i, 0])
             contribs.append(contribs_mes)
+        print(contribs[-1][:6])
         return contribs
 
     def verifica_contrib_negativa(self,
@@ -645,9 +654,10 @@ class YuleWalkerPARA:
             ordem = ordens[i]
             for j in range(ordem):
                 if contrib[j] < 0:
+                    print(f"Contrib negativa no mês {i + 1}, ordem {j + 1}")
                     contrib_negativa.append(i)
         return list(set(contrib_negativa))
- 
+
     def reducao_ordem(self,
                       ordens_iniciais: np.ndarray,
                       configs: np.ndarray):

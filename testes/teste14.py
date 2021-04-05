@@ -84,7 +84,7 @@ for ree in IDS_REES:
             c_ant = cfgs.configs_por_ano[a_ant]
             c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
-        # Calcula as ordens finais partindo das ordens inciais
+        # Calcula as ordens finais partindo das ordens iniciais
         ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais, configs)
         ordens = parp.ordens_finais_ree(ree)[ano]
         # print(f"Ordens originais:        {ordens_originais}")
