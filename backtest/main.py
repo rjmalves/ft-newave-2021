@@ -72,6 +72,10 @@ def main():
     # GT para SIN
     grafico_gt_sin(casos, saida)
 
+    # Exporta os dados
+    for c in casos:
+        exporta_dados(c, saida)
+
     # Altera o nome do 50x35 para simplificar
     cvar_50x35.nome = "VminOP"
 
@@ -91,8 +95,8 @@ def main():
     grafico_gt_sin_dif(casos_cmp, saida_cmp)
 
     # Exporta os dados
-    for c in casos:
-        exporta_dados(c, saida)
+    for c in casos_cmp:
+        exporta_dados(c, saida_cmp)
 
 
 if __name__ == "__main__":

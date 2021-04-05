@@ -130,7 +130,7 @@ def grafico_cmo_subsistema_dif(casos: List[Caso],
 
 
 def grafico_earm_subsistema_dif(casos: List[Caso],
-                               dir_saida: str):
+                                dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução do Armazenamento por Submercado",
@@ -219,7 +219,7 @@ def grafico_earm_subsistema_dif(casos: List[Caso],
 
 
 def grafico_gt_subsistema_dif(casos: List[Caso],
-                               dir_saida: str):
+                              dir_saida: str):
     # Cria o objeto de figura
     fig, axs = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Evolução da Geração Térmica por Submercado",
@@ -345,9 +345,9 @@ def grafico_earm_sin_dif(casos: List[Caso],
               basefmt='grey')
     # Adiciona a legenda e limita os eixos
     x_ticks, x_labels = xticks_graficos()
+    twin.set_ylim(-max_y_dif, max_y_dif)
     plt.xlim(0, max_x)
     plt.ylim(0, 100)
-    twin.set_ylim(-max_y_dif, max_y_dif)
     plt.xticks(x_ticks + [max_x],
                [""] + x_labels,
                fontsize=9)
@@ -388,7 +388,7 @@ def grafico_gt_sin_dif(casos: List[Caso],
                      alpha=0.8,
                      label=caso.nome)
         handlers_legendas.append(h)
-    
+
     plt.legend(handlers_legendas,
                labels=[c.nome for c in casos],
                bbox_to_anchor=(0.462, -0.18),

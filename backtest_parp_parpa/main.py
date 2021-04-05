@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def main():
     # Diretórios com as saídas do backtest no formato
     # relato_AAAA_MM.rvX
@@ -62,7 +63,6 @@ def main():
     cvar_25x50_dcp3010 = Caso.constroi_caso_de_pasta(dir_cvar_50x25_dcp3010,
                                                      nome)
 
-
     casos = [
              oficial,
              cvar_50x25_parpa,
@@ -105,7 +105,6 @@ def main():
     grafico_gt_subsistema_dif(casos_cmp, saida_cmp)
     grafico_earm_sin_dif(casos_cmp, saida_cmp)
     grafico_gt_sin_dif(casos_cmp, saida_cmp)
-
 
     casos_cmp_vers = [
                       oficial,
