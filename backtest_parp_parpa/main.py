@@ -30,7 +30,7 @@ def main():
     dir_cvar_50x35_parpa = os.getenv("DIR_CVAR_5035_PARPA")
     dir_cvar_50x50_parpa = os.getenv("DIR_CVAR_5050_PARPA")
     dir_cvar_25x50_parpa = os.getenv("DIR_CVAR_2550_PARPA")
-    dir_cvar_50x25_dcp3010 = os.getenv("DIR_CVAR_5025_decomp3010")
+    dir_cvar_50x35_dcp3010 = os.getenv("DIR_CVAR_5035_decomp3010")
 
     # Constroi os casos
     oficial = Caso.constroi_caso_de_pasta(dir_oficial,
@@ -60,7 +60,7 @@ def main():
     cvar_25x50_parpa = Caso.constroi_caso_de_pasta(dir_cvar_25x50_parpa,
                                                    nome)
     nome = "$\\alpha$ = 25%, $\\lambda$ = 50% DCP 30.10"
-    cvar_25x50_dcp3010 = Caso.constroi_caso_de_pasta(dir_cvar_50x25_dcp3010,
+    cvar_50x35_dcp3010 = Caso.constroi_caso_de_pasta(dir_cvar_50x35_dcp3010,
                                                      nome)
 
     casos = [
@@ -106,10 +106,16 @@ def main():
     grafico_earm_sin_dif(casos_cmp, saida_cmp)
     grafico_gt_sin_dif(casos_cmp, saida_cmp)
 
+    # Exporta os dados
+    for c in casos:
+        exporta_dados(c, saida)
+
+    cvar_50x35_parpa.nome = "PAR(p)-A DCP 30.08"
+    cvar_50x35_dcp3010.nome = "PAR(p)-A DCP 30.10"
     casos_cmp_vers = [
                       oficial,
-                      cvar_25x50_parp,
-                      cvar_25x50_dcp3010
+                      cvar_50x35_parpa,
+                      cvar_50x35_dcp3010
                      ]
 
     saida_cmp_vers = os.getenv("DIR_SAIDA_CMP_VERS_DCP")
@@ -121,8 +127,8 @@ def main():
     grafico_gt_sin_dif(casos_cmp_vers, saida_cmp_vers)
 
     # Exporta os dados
-    for c in casos:
-        exporta_dados(c, saida)
+    for c in casos_cmp_vers:
+        exporta_dados(c, saida_cmp_vers)
 
 
 if __name__ == "__main__":
