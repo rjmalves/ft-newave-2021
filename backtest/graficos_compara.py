@@ -253,23 +253,23 @@ def grafico_gt_subsistema_dif(casos: List[Caso],
             max_y = max([max_y] + list(y))
             min_y = min([min_y] + list(y))
             # Faz o plot
-            h = axs[subx, suby].plot(x, y,
-                                     linewidth=3,
-                                     linestyle="solid",
-                                     color=CORES[c],
-                                     alpha=0.8,
-                                     label=caso.nome)
+            h, = axs[subx, suby].plot(x, y,
+                                      linewidth=3,
+                                      linestyle="solid",
+                                      color=CORES[c],
+                                      alpha=0.8,
+                                      label=caso.nome)
             handlers_legendas.append(h)
         # Calcula as diferenças
         difs = (np.array(casos[1].gt_subsis[sub][1:]) -
                 np.array(casos[0].gt_subsis[sub][1:]))
         # Faz o plot das diferenças
         max_y_dif = max([abs(max_y_dif)] + list(difs))
-        h = twins[subx][suby].stem(x, difs,
-                                   linefmt='grey',
-                                   markerfmt='none',
-                                   basefmt='grey',
-                                   label="Diferença")
+        h, = twins[subx][suby].stem(x, difs,
+                                    linefmt='grey',
+                                    markerfmt='none',
+                                    basefmt='grey',
+                                    label="Diferença")
         handlers_legendas.append(h)
         axs[subx, suby].set_title(sub)
     # Adiciona a legenda e limita os eixos
@@ -319,12 +319,12 @@ def grafico_earm_sin_dif(casos: List[Caso],
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
         # Faz o plot
-        h = plt.plot(x, y,
-                     linewidth=3,
-                     linestyle="solid",
-                     color=CORES[c],
-                     alpha=0.8,
-                     label=caso.nome)
+        h, = plt.plot(x, y,
+                      linewidth=3,
+                      linestyle="solid",
+                      color=CORES[c],
+                      alpha=0.8,
+                      label=caso.nome)
         handlers_legendas.append(h)
     plt.legend(handlers_legendas,
                [c.nome for c in casos],
@@ -381,12 +381,12 @@ def grafico_gt_sin_dif(casos: List[Caso],
         max_y = max([max_y] + list(y))
         min_y = min([min_y] + list(y))
         # Faz o plot
-        h = plt.plot(x, y,
-                     linewidth=3,
-                     linestyle="solid",
-                     color=CORES[c],
-                     alpha=0.8,
-                     label=caso.nome)
+        h, = plt.plot(x, y,
+                      linewidth=3,
+                      linestyle="solid",
+                      color=CORES[c],
+                      alpha=0.8,
+                      label=caso.nome)
         handlers_legendas.append(h)
 
     plt.legend(handlers_legendas,
