@@ -70,8 +70,7 @@ for ree in IDS_REES:
     yw = YuleWalkerPARA(series_energia)
     contribs = parp.contribuicoes_ree(ree)
     mes = 0
-    for a, ano in enumerate([2020]):
-    # for a, ano in enumerate(parp.anos_estudo):
+    for a, ano in enumerate(parp.anos_estudo):
         ordens_originais = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
@@ -85,7 +84,8 @@ for ree in IDS_REES:
             c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         # Calcula as ordens finais partindo das ordens iniciais
-        ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais, configs)
+        ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais,
+                                                             configs)
         ordens = parp.ordens_finais_ree(ree)[ano]
         # Atualiza as variáveis com as máximas diferenças
         for m, o in enumerate(ordens_finais):
