@@ -35,7 +35,7 @@ from parpa.yulewalker import YuleWalkerPAR
 
 
 # Variáveis auxiliares no processo
-diretorio_parp = "/home/rogerio/ONS/validacao_newave2743/pmo_2020_11_oficial"
+diretorio_parp = "/home/rogerio/ONS/validacao_newave2745/pmo_2021_01_sul_50_mlt_parp"
 
 # Lê o arquivo pmo.dat
 pmo = LeituraPMO(diretorio_parp).le_arquivo()
@@ -70,8 +70,7 @@ for ree in IDS_REES:
     yw = YuleWalkerPAR(series_energia)
     contribs = parp.contribuicoes_ree(ree)
     mes = 0
-    for a, ano in enumerate([2020]):
-    # for a, ano in enumerate(parp.anos_estudo):
+    for a, ano in enumerate(parp.anos_estudo):
         ordens_originais = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
