@@ -270,7 +270,7 @@ def grafico_ghid_subsistema(casos: List[Caso],
     for ax in axs.flat:
         ax.set(xlabel='', ylabel='Ghid (MWmed)')
     # Variáveis para limitar os eixos no futuro
-    max_y = 0.0
+    max_y = {s: 0 for s in SUBSISTEMAS}
     min_y = {s: 1e4 for s in SUBSISTEMAS}
     max_x = 0
 
@@ -286,7 +286,7 @@ def grafico_ghid_subsistema(casos: List[Caso],
             x = list(range(caso.n_revs))
             y = caso.ghid_subsis[sub][1:]
             max_x = max([len(x) - 1, max_x])
-            max_y = max([max_y] + list(y))
+            max_y[sub] = max([max_y[sub]] + list(y))
             min_y[sub] = min([min_y[sub]] + list(y))
             # Faz o plot
             h, = axs[subx, suby].plot(x, y,
@@ -303,11 +303,11 @@ def grafico_ghid_subsistema(casos: List[Caso],
         subx = int(s / 2)
         suby = s % 2
         axs[subx, suby].set_xlim(0, max_x)
-        axs[subx, suby].set_ylim(0, max_y)
+        axs[subx, suby].set_ylim(min_y[sub], max_y[sub])
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
-        axs[subx, suby].set_yticks(range(0, int(max_y), 1000),
+        axs[subx, suby].set_yticks(range(0, int(max_y[sub]), 1000),
                                    minor=True)
         axs[subx, suby].grid(which='major', axis='y', alpha=0.5)
         axs[subx, suby].grid(which='minor', axis='y', alpha=0.2)
@@ -448,7 +448,7 @@ def grafico_ghid_sin(casos: List[Caso],
     ax.set_ylabel('GHid (MWmed)')
     # Variáveis para limitar os eixos no futuro
     max_y = 0.0
-    min_y = 1e4
+    min_y = 1e6
     max_x = 0
 
     handlers_legendas = []
@@ -473,7 +473,7 @@ def grafico_ghid_sin(casos: List[Caso],
     ax.set_ylim(min_y, max_y)
     ax.set_xticks(x_ticks)
     ax.set_xticklabels(x_labels, fontsize=9)
-    ax.set_yticks(list(range(0, int(max_y), 1000)), minor=True)
+    ax.set_yticks(list(range(int(min_y), int(max_y), 1000)), minor=True)
     ax.grid(which='major', axis='y', alpha=0.5)
     ax.grid(which='minor', axis='y', alpha=0.2)
     plt.tight_layout()
