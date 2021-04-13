@@ -347,7 +347,8 @@ def grafico_ghid_subsistema(casos: List[Caso],
         axs[subx, suby].set_xticks(x_ticks)
         axs[subx, suby].set_xticklabels(x_labels,
                                         fontsize=9)
-        axs[subx, suby].set_yticks(range(int(min_y[sub]),
+        axs[subx, suby].set_yticks(range(int(round(min_y[sub]/1000)
+                                             * 1000),
                                          int(max_y[sub]),
                                          1000),
                                    minor=True)
