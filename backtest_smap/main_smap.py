@@ -4,7 +4,9 @@ from graficos import grafico_deficit_subsistema
 from graficos import grafico_earm_sin  # type: ignore
 from graficos import grafico_earm_subsistema  # type: ignore
 from graficos import grafico_gt_sin  # type: ignore
+from graficos import grafico_ghid_sin  # type: ignore
 from graficos import grafico_gt_subsistema  # type: ignore
+from graficos import grafico_ghid_subsistema  # type: ignore
 from graficos import exporta_dados  # type: ignore
 
 import os
@@ -31,18 +33,19 @@ def main():
     nome = "SMAP Perfeito 1º Mês"
     perfeito1mes = Caso.constroi_caso_de_pasta(dir_perfeito_1omes,
                                                nome)
-    nome = "SMAP Perfeito"
-    perfeito = Caso.constroi_caso_de_pasta(dir_perfeito,
-                                           nome)
-    nome = "SMAP Proposto"
-    proposto = Caso.constroi_caso_de_pasta(dir_proposto,
-                                           nome)
+    # nome = "SMAP Perfeito"
+    # perfeito = Caso.constroi_caso_de_pasta(dir_perfeito,
+    #                                        nome)
+    # nome = "SMAP Proposto"
+    # proposto = Caso.constroi_caso_de_pasta(dir_proposto,
+    #                                        nome)
 
-    casos = [vigente,
+    casos = [
+             vigente,
              mes2semanas,
              perfeito1mes,
-             perfeito,
-             proposto
+            #  perfeito,
+            #  proposto
              ]
 
     saida = os.getenv("DIR_SAIDA_SMAP")
@@ -54,12 +57,16 @@ def main():
     grafico_earm_subsistema(casos, saida)
     # GT por subsistema
     grafico_gt_subsistema(casos, saida)
+    # Ghid por subsistema
+    grafico_ghid_subsistema(casos, saida)
     # Déficit por subsistema
     grafico_deficit_subsistema(casos, saida)
     # EARM para SIN
     grafico_earm_sin(casos, saida)
     # GT para SIN
     grafico_gt_sin(casos, saida)
+    # GHid para SIN
+    grafico_ghid_sin(casos, saida)
 
     # Exporta os dados
     for c in casos:
