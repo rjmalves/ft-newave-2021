@@ -36,16 +36,16 @@ def main():
     # nome = "SMAP Perfeito"
     # perfeito = Caso.constroi_caso_de_pasta(dir_perfeito,
     #                                        nome)
-    # nome = "SMAP Proposto"
-    # proposto = Caso.constroi_caso_de_pasta(dir_proposto,
-    #                                        nome)
+    nome = "SMAP Proposto"
+    proposto = Caso.constroi_caso_de_pasta(dir_proposto,
+                                           nome)
 
     casos = [
              vigente,
              mes2semanas,
              perfeito1mes,
             #  perfeito,
-            #  proposto
+             proposto
              ]
 
     saida = os.getenv("DIR_SAIDA_SMAP")
