@@ -6,3 +6,4 @@ matplotlib
 mypy
 flake8
 python-dotenv
+pandas

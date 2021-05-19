@@ -35,8 +35,7 @@ from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = ("/home/rogerio/ONS/validacao_newave2743" +
-                   "/pmo_2020_11_parpa_sem_redordem")
+diretorio_parpa = "C:\\Users\\roger\\OneDrive\\Documentos\\ONS\\teste_red_ordem\\nw27.4.7"
 
 # Lê o arquivo pmo.dat
 pmo = LeituraPMO(diretorio_parpa).le_arquivo()
@@ -70,7 +69,7 @@ for ree in IDS_REES:
     yw = YuleWalkerPARA(series_energia)
     mes = 1
     for a, ano in enumerate(parp.anos_estudo):
-        ordens_finais = parp.ordens_finais_ree(ree)[ano]
+        ordens_orig = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
         if a == 0:
@@ -85,14 +84,14 @@ for ree in IDS_REES:
         for p in range(0, 12):
             # Atualiza as variáveis com as máximas diferenças
             ordem = yw.escolhe_ordem_modelo(p, 6, configs)
-            dif = abs(ordem - ordens_finais[p])
+            dif = abs(ordem - ordens_orig[p])
             if dif > n_dif_ree[ree]:
                 n_dif_ree[ree] = dif
-            ano_n_dif_ree[ree] = ano
-            periodo_n_dif_ree[ree] = p + 1
-            ordem_n_dif_ree[ree] = ordens_finais[p]
-            signi_n_dif_ree[ree] = ordem
-            mes += 1
+                ano_n_dif_ree[ree] = ano
+                periodo_n_dif_ree[ree] = p + 1
+                ordem_n_dif_ree[ree] = ordens_orig[p]
+                signi_n_dif_ree[ree] = ordem
+                mes += 1
 
 print("")
 print(" REE | MAX. DIF. |  ANO | MES |" +

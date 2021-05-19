@@ -1,4 +1,6 @@
+from inewave.config import MESES
 import numpy as np  # type: ignore
+import time
 from copy import deepcopy
 from scipy.linalg import toeplitz  # type: ignore
 from typing import List, Dict
@@ -586,7 +588,8 @@ class YuleWalkerPARA:
         return ordem
 
     def contribuicoes(self,
-                      coefs: List[List[float]]):
+                      coefs: List[List[float]],
+                      ordens: List[int]):
         """
         """
         fis: List[List[float]] = []
@@ -613,16 +616,20 @@ class YuleWalkerPARA:
             fis_mes += [0] * (12 - len(fis_mes))
             fis.append(fis_mes)
 
+        # for m in range(len(fis)):
+        #     print(f"Mês {MESES[m]} - Fis = {fis[m][:ordens[m]]} - Psi = {psis[m]}")
         contribs: List[List[float]] = []
         # Para cada mês, compôe as contribuições da maneira recursiva
         for p in range(n_meses):
             matriz_aux = np.zeros((max_lag, n_meses))
             # Atribui a primeira linha da matriz auxiliar com os fis,
             # já somados com as contribuições das suas médias
-            for j in range(n_meses):
+            for j in range(max_lag):
                 matriz_aux[0, j] = fis[p][j] + psis[p] / 12
             contribs_mes = [matriz_aux[0, 0]]
             # Para cada coeficiente, adiciona as contribuições recursivas
+            # if p == 5:
+            #     print(f"Matriz AUX para o mês {MESES[p]}")
             for i in range(1, max_lag):
                 aux = (p - i) % n_meses
                 for j in range(max_lag):
@@ -631,14 +638,16 @@ class YuleWalkerPARA:
                     # e o valor acumulado era tmp * (1 + psi/12).
 
                     # Backup do código:
-                    # tmp = matriz_aux[i - 1, 0] * fis[aux][j]
+                    # tmp = matriz_aux[i - 1, 0] * (fis[aux][j] + psis[aux] / 12)
                     # matriz_aux[i, j] = (tmp
                     #                     + tmp * psis[aux] / 12
                     #                     + matriz_aux[i - 1, j + 1])
-
                     contrib_aux = fis[aux][j] + psis[aux] / 12
                     matriz_aux[i, j] = (matriz_aux[i - 1, 0] * contrib_aux
                                         + matriz_aux[i - 1, j + 1])
+            # if p == 5:
+            #     print(matriz_aux[:, :7])
+            #     time.sleep(0.5)
                 contribs_mes.append(matriz_aux[i, 0])
             contribs.append(contribs_mes)
         return contribs
@@ -666,7 +675,11 @@ class YuleWalkerPARA:
         # Realiza a estimação inicial
         coefs_estimados = self.estima_modelo(ordens, configs)
         # Calcula as contribuições a partir dos desvios
-        contribs = self.contribuicoes(coefs_estimados)
+        contribs = self.contribuicoes(coefs_estimados, ordens)
+        # for p in range(self.periodos):
+        #         print(f"Mês {MESES[p]} - Ordem: {ordens[p]}")
+        #         print(f"    Contribs: {contribs[p][:ordens[p]]}")
+        # print("-----------------------------------------------")
         contrib_negativa = self.verifica_contrib_negativa(ordens,
                                                           contribs)
         while True:
@@ -684,7 +697,11 @@ class YuleWalkerPARA:
                                                       ordens_maximas[p],
                                                       configs)
             coefs_estimados = self.estima_modelo(ordens, configs)
-            contribs = self.contribuicoes(coefs_estimados)
+            contribs = self.contribuicoes(coefs_estimados, ordens)
+            # for p in range(self.periodos):
+            #     print(f"Mês {MESES[p]} - Ordem: {ordens[p]}")
+            #     print(f"    Contribs: {contribs[p][:ordens[p]]}")
+            # print("-----------------------------------------------")
             contrib_negativa = self.verifica_contrib_negativa(ordens,
                                                               contribs)
-        return ordens, contribs
+        return ordens, contribs, coefs_estimados

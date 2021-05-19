@@ -435,7 +435,14 @@ def exporta_dados(caso: Caso,
     """
     Exporta um conjunto de dados para um formato CSV.
     """
-    cabecalhos = ["NOME_ARQ", "EARM_SE", "EARM_S",
+    cabecalhos = ["NOME_ARQ", 
+                  "EARM_REE_SUDESTE", "EARM_REE_SUL",
+                  "EARM_REE_NORDESTE", "EARM_REE_NORTE",
+                  "EARM_REE_ITAIPU", "EARM_REE_MADEIRA",
+                  "EARM_REE_TPIRES", "EARM_REE_BMONTE",
+                  "EARM_REE_MAN-AP", "EARM_REE_PARANA",
+                  "EARM_REE_IGUACU", "EARM_REE_PRNPANEMA",
+                  "EARM_SE", "EARM_S",
                   "EARM_NE", "EARM_N", "EARM_SIN",
                   "GT_SE", "GT_S", "GT_NE", "GT_N",
                   "GT_SIN", "GH_SE", "GH_S", "GH_NE",
@@ -455,6 +462,18 @@ def exporta_dados(caso: Caso,
                 nome = "INI"
             else:
                 nome = caso.arquivos[i]
+            earm_ree_sudeste = caso.earm_ree["SUDESTE"][i]
+            earm_ree_sul = caso.earm_ree["SUL"][i]
+            earm_ree_nordeste = caso.earm_ree["NORDESTE"][i]
+            earm_ree_norte = caso.earm_ree["NORTE"][i]
+            earm_ree_itaipu = caso.earm_ree["ITAIPU"][i]
+            earm_ree_madeira = caso.earm_ree["MADEIRA"][i]
+            earm_ree_tpires = caso.earm_ree["TPIRES"][i]
+            earm_ree_bmonte = caso.earm_ree["BMONTE"][i]
+            earm_ree_manap = caso.earm_ree["MAN-AP"][i]
+            earm_ree_parana = caso.earm_ree["PARANA"][i]
+            earm_ree_iguacu = caso.earm_ree["IGUACU"][i]
+            earm_ree_prnpanema = caso.earm_ree["PRNPANEMA"][i]
             earm_se = caso.earm_subsis["SE"][i]
             earm_s = caso.earm_subsis["S"][i]
             earm_ne = caso.earm_subsis["NE"][i]
@@ -479,6 +498,18 @@ def exporta_dados(caso: Caso,
             def_ne = caso.def_subsis["NE"][i]
             def_n = caso.def_subsis["N"][i]
             escritor.writerow([nome,
+                               earm_ree_sudeste,
+                               earm_ree_sul,
+                               earm_ree_nordeste,
+                               earm_ree_norte,
+                               earm_ree_itaipu,
+                               earm_ree_madeira,
+                               earm_ree_tpires,
+                               earm_ree_bmonte,
+                               earm_ree_manap,
+                               earm_ree_parana,
+                               earm_ree_iguacu,
+                               earm_ree_prnpanema,
                                earm_se,
                                earm_s,
                                earm_ne,

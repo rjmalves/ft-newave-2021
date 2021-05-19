@@ -28,14 +28,15 @@
 
 from inewave.newave.pmo import LeituraPMO  # type: ignore
 from inewave.newave.parp import LeituraPARp  # type: ignore
-from inewave.config import REES  # type: ignore
+from inewave.config import MESES, REES  # type: ignore
 from typing import Dict
 import numpy as np
+import pandas as pd
 from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "/home/rogerio/ONS/validacao_newave2744/pmo_2020_11_parpa"
+diretorio_parpa = "C:\\Users\\roger\\OneDrive\\Documentos\\ONS\\teste_red_ordem\\nw27.4.7"
 
 # Lê o arquivo pmo.dat
 pmo = LeituraPMO(diretorio_parpa).le_arquivo()
@@ -64,13 +65,16 @@ coef_e_max_dif_ree: Dict[int, float] = {ree: 0
 
 
 # Faz a estimação para as ordens iniciais do modelo PAR(p)-A
+tabela_diferenças = np.zeros((12, 12), dtype=np.int64)
 for ree in IDS_REES:
     print(f"Reduzindo ordens para REE {ree} - {REES[ree - 1]}")
     series_energia = parp.series_energia_ree(ree)
     yw = YuleWalkerPARA(series_energia)
     contribs = parp.contribuicoes_ree(ree)
+    coefs = parp.coeficientes_ree(ree)
     mes = 0
     for a, ano in enumerate(parp.anos_estudo):
+        # print(f"ANO {ano}")
         ordens_originais = parp.ordens_originais_ree(ree)[ano]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
@@ -84,19 +88,30 @@ for ree in IDS_REES:
             c_atual = cfgs.configs_por_ano[ano]
             configs = np.array([c_ant, c_atual])
         # Calcula as ordens finais partindo das ordens iniciais
-        ordens_finais, contribs_estimadas = yw.reducao_ordem(ordens_originais,
-                                                             configs)
+        ordens_finais, contribs_f, coefs_f = yw.reducao_ordem(ordens_originais,
+                                                              configs)
         ordens = parp.ordens_finais_ree(ree)[ano]
         # Atualiza as variáveis com as máximas diferenças
         for m, o in enumerate(ordens_finais):
+            # print(f"Mês {mes + 1}")
+            # print(f"Coeficientes NEWAVE = {coefs[mes]}")
+            # print(f"Coeficientes Python = {coefs_f[mes % 12]}")
             dif = abs(o - ordens[m])
+            tabela_diferenças[m % 12, ree - 1] = dif
             if dif > max_dif_ree[ree]:
                 max_dif_ree[ree] = dif
-            ano_max_dif_ree[ree] = ano
-            periodo_max_dif_ree[ree] = mes + 1
-            coef_e_max_dif_ree[ree] = o
-            coef_o_max_dif_ree[ree] = ordens[m]
+                ano_max_dif_ree[ree] = ano
+                periodo_max_dif_ree[ree] = mes + 1
+                coef_e_max_dif_ree[ree] = o
+                coef_o_max_dif_ree[ree] = ordens[m]
             mes += 1
+
+pd.DataFrame(tabela_diferenças,
+             columns=REES,
+             index=MESES).to_csv("tabela.csv",
+                                 sep=";",
+                                 encoding="utf-8",
+                                 line_terminator="")
 
 print("")
 print(" REE | MAX. DIF. |  ANO  | MES |" +
