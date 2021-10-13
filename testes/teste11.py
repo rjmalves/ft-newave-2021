@@ -1,7 +1,7 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 13
+# TESTE 11
 #
 # Processar um caso com a funcionalidade PAR(p)-A habilitada e
 # verificar no arquivo PARP.DAT o cálculo das autocorrelações

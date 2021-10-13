@@ -1,7 +1,7 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 25
+# TESTE 23
 #
 # Processar um caso com restrição elétrica e verificar a
 # consideração desta restrição no período pós quando se

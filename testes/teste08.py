@@ -1,7 +1,7 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 10
+# TESTE 08
 #
 # Processar um caso com a funcionalidade PAR(p)-A habilitada
 # e verificar a opção ir direto para simulação final.

@@ -1,7 +1,7 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 20
+# TESTE 18
 #
 # Processar um caso condicionado com X% da MLT como tendência
 # hidrológica, utilizando as metodologias PAR(p) e PAR(p)-A.

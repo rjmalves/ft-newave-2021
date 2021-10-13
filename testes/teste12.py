@@ -1,7 +1,7 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 14
+# TESTE 12
 #
 # Processar um caso com a funcionalidade PAR(p)-A habilitada
 # e verificar o processo de redução automática da ordem do modelo.
