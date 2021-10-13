@@ -29,6 +29,8 @@
 #
 # 6- Observar a saída exibida no terminal.
 
+# TODO - Atualizar
+
 from inewave.newave.pmo import PMO
 from inewave.newave.parp import PARp
 from inewave.nwlistop.mediassin import MediasSIN
