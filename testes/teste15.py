@@ -26,8 +26,8 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.pmo import LeituraPMO  # type: ignore
-from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.newave.pmo import PMO  # type: ignore
+from inewave.newave.parp import PARp  # type: ignore
 from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
@@ -35,13 +35,13 @@ from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "C:\\Users\\roger\\OneDrive\\Documentos\\ONS\\teste_red_ordem\\nw27.4.7"
+diretorio_parpa = "/home/rogerio/ONS/testes_ft/parpa"
 
 # Lê o arquivo pmo.dat
-pmo = LeituraPMO(diretorio_parpa).le_arquivo()
+pmo = PMO.le_arquivo(diretorio_parpa)
 
 # Lê o arquivo parp.dat
-parp = LeituraPARp(diretorio_parpa).le_arquivo()
+parp = PARp.le_arquivo(diretorio_parpa)
 
 # Variáveis auxiliares para armazenar valores
 IDS_REES = range(1, len(REES) + 1)
@@ -60,26 +60,26 @@ signi_n_dif_ree: Dict[int, int] = {ree: 0
                                    for ree in IDS_REES}
 
 # Lê a FACP do parp.dat e compara com o intervalo de confiança
-interv_conf = 1.96/np.sqrt(len(parp.anos_historico))
+interv_conf = 1.96/np.sqrt(2021 - 1931 + 1)
 
 for ree in IDS_REES:
     print("Escolhendo ordens dos modelos para REE" +
           f" {ree} - {REES[ree - 1]}")
-    series_energia = parp.series_energia_ree(ree)
+    series_energia = {c + 1: parp.series_energia_ree(ree, c)
+                      for c in range(60)}
     yw = YuleWalkerPARA(series_energia)
-    mes = 1
+    mes = 0
     for a, ano in enumerate(parp.anos_estudo):
-        ordens_orig = parp.ordens_originais_ree(ree)[ano]
+        ordens_orig = parp.ordens_originais_ree(ree)[a, :]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
         if a == 0:
-            c_atual = cfgs.configs_por_ano[ano]
+            c_atual = cfgs[a, 1:]
             c_ant = list(np.ones_like(c_atual, dtype=np.int64))
             configs = np.array([c_ant, c_atual])
         else:
-            a_ant = parp.anos_estudo[a - 1]
-            c_ant = cfgs.configs_por_ano[a_ant]
-            c_atual = cfgs.configs_por_ano[ano]
+            c_ant = cfgs[a - 1, 1:]
+            c_atual = cfgs[a, 1:]
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
             # Atualiza as variáveis com as máximas diferenças

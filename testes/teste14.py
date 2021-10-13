@@ -26,8 +26,8 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.pmo import LeituraPMO  # type: ignore
-from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.newave.pmo import PMO  # type: ignore
+from inewave.newave.parp import PARp  # type: ignore
 from inewave.config import MESES, REES  # type: ignore
 from typing import Dict
 import numpy as np
@@ -36,13 +36,13 @@ from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "C:\\Users\\roger\\OneDrive\\Documentos\\ONS\\teste_red_ordem\\nw27.4.7"
+diretorio_parpa = "/home/rogerio/ONS/testes_ft/parpa"
 
 # Lê o arquivo pmo.dat
-pmo = LeituraPMO(diretorio_parpa).le_arquivo()
+pmo = PMO.le_arquivo(diretorio_parpa)
 
 # Lê o arquivo parp.dat
-parp = LeituraPARp(diretorio_parpa).le_arquivo()
+parp = PARp.le_arquivo(diretorio_parpa)
 
 # Realiza a verificação de igualdade para todas as
 # configurações de todas as REEs.
@@ -68,29 +68,29 @@ coef_e_max_dif_ree: Dict[int, float] = {ree: 0
 tabela_diferenças = np.zeros((12, 12), dtype=np.int64)
 for ree in IDS_REES:
     print(f"Reduzindo ordens para REE {ree} - {REES[ree - 1]}")
-    series_energia = parp.series_energia_ree(ree)
+    series_energia = {c + 1: parp.series_energia_ree(ree, c)
+                      for c in range(60)}
     yw = YuleWalkerPARA(series_energia)
-    contribs = parp.contribuicoes_ree(ree)
+    contribs = parp.coeficientes_desvio_ree(ree)
     coefs = parp.coeficientes_ree(ree)
     mes = 0
     for a, ano in enumerate(parp.anos_estudo):
         # print(f"ANO {ano}")
-        ordens_originais = parp.ordens_originais_ree(ree)[ano]
+        ordens_originais = parp.ordens_originais_ree(ree)[a, :]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
         if a == 0:
-            c_atual = cfgs.configs_por_ano[ano]
+            c_atual = cfgs[a, 1:]
             c_ant = list(np.ones_like(c_atual, dtype=np.int64))
             configs = np.array([c_ant, c_atual])
         else:
-            a_ant = parp.anos_estudo[a - 1]
-            c_ant = cfgs.configs_por_ano[a_ant]
-            c_atual = cfgs.configs_por_ano[ano]
+            c_ant = cfgs[a - 1, 1:]
+            c_atual = cfgs[a, 1:]
             configs = np.array([c_ant, c_atual])
         # Calcula as ordens finais partindo das ordens iniciais
         ordens_finais, contribs_f, coefs_f = yw.reducao_ordem(ordens_originais,
                                                               configs)
-        ordens = parp.ordens_finais_ree(ree)[ano]
+        ordens = parp.ordens_finais_ree(ree)[a, :]
         # Atualiza as variáveis com as máximas diferenças
         for m, o in enumerate(ordens_finais):
             # print(f"Mês {mes + 1}")
