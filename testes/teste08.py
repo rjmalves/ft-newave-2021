@@ -1,11 +1,12 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 08
+# TESTE 10
 #
-# Processar um caso com a funcionalidade PAR(p)-A habilitada,
-# executar o programa NEWDESP e avaliar a impressão da parcela
-# anual (X) utilizada no modelo PAR(p)-A
+# Processar um caso com a funcionalidade PAR(p)-A habilitada
+# e verificar a opção ir direto para simulação final.
+# •	simulação final sintética
+# •	simulação final histórica
 
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
 #
@@ -23,6 +24,6 @@
 #    python -m pip install -r requirements.txt
 #
 # 5- Executar no terminal o script desejado. Por ex:
-#    python testes/teste08.py
+#    python testes/teste10.py
 #
 # 6- Observar a saída exibida no terminal.

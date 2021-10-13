@@ -1,11 +1,11 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 12
+# TESTE 13
 #
 # Processar um caso com a funcionalidade PAR(p)-A habilitada e
-# verificar no arquivo PARP.DAT o cálculo das correlações entre
-# a parcela anual e afluências mensais.
+# verificar no arquivo PARP.DAT o cálculo das autocorrelações
+# parciais através do método de correlações condicionadas.
 
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
 #
@@ -23,7 +23,7 @@
 #    python -m pip install -r requirements.txt
 #
 # 5- Executar no terminal o script desejado. Por ex:
-#    python testes/teste12.py
+#    python testes/teste13.py
 #
 # 6- Observar a saída exibida no terminal.
 
@@ -32,7 +32,7 @@ from inewave.newave.parp import PARp  # type: ignore
 from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
-from parpa.yulewalker import YuleWalkerPARA
+from parpa.yulewalker import YuleWalkerPARA  # type: ignore
 
 
 # Variáveis auxiliares no processo
@@ -80,12 +80,11 @@ coef_e_max_dif_perc_ree: Dict[int, float] = {ree: 0
 # Calcula as autocorrelações parciais e compara com o arquivo
 # Calcula a FACP para o período
 for ree in IDS_REES:
-    print("Calculando Corr. Cruz. Média para REE" +
-          f" {ree} - {REES[ree - 1]}")
+    print(f"Calculando FACP para REE {ree} - {REES[ree - 1]}")
     series_energia = {c + 1: parp.series_energia_ree(ree, c)
                       for c in range(60)}
     yw = YuleWalkerPARA(series_energia)
-    serie_ccruz = parp.correlograma_media_ree(ree)
+    serie_facp = parp.correlograma_energia_ree(ree)
     mes = 0
     for a, ano in enumerate(parp.anos_estudo):
         ordens_finais = parp.ordens_finais_ree(ree)[a, :]
@@ -100,10 +99,10 @@ for ree in IDS_REES:
             c_atual = cfgs[a, 1:]
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
-            ccruz = yw.corr_cruzada_media(p, 12, configs)
+            facp = yw.facp(p, 12, configs)
             # Atualiza as variáveis com as máximas diferenças
-            for i, c in enumerate(ccruz):
-                oficial = serie_ccruz[mes][i]
+            for i, c in enumerate(facp):
+                oficial = serie_facp[mes][i]
                 dif = abs(c - oficial)
                 dif_percentual = 100 * abs(c - oficial) / oficial
                 if dif > max_dif_ree[ree]:
@@ -111,21 +110,21 @@ for ree in IDS_REES:
                     max_dif_percent_ree[ree] = dif_percentual
                     ano_max_dif_ree[ree] = ano
                     periodo_max_dif_ree[ree] = mes
-                    ordem_max_dif_ree[ree] = i
+                    ordem_max_dif_ree[ree] = i + 1
                     coef_e_max_dif_ree[ree] = c
                     coef_o_max_dif_ree[ree] = oficial
                 if dif_percentual > max_dif_percent_ree[ree]:
                     max_dif_percent_ree[ree] = dif_percentual
                     ano_max_dif_perc_ree[ree] = ano
                     periodo_max_dif_perc_ree[ree] = mes
-                    ordem_max_dif_perc_ree[ree] = i
+                    ordem_max_dif_perc_ree[ree] = i + 1
                     coef_e_max_dif_perc_ree[ree] = c
                     coef_o_max_dif_perc_ree[ree] = oficial
             mes += 1
 
 print("")
 print(" REE | MAX. DIF. ABS. | MES | LAG |" +
-      " CCRUZ OFICIAL | CCRUZ CALCULADA")
+      " FACP  OFICIAL | FACP CALCULADA")
 print("--------------------------------" +
       "-----------------------------------")
 for ree in IDS_REES:
@@ -143,7 +142,7 @@ print("---------------------------------" +
 print("")
 
 print(" REE | MAX. DIF. PERC. | MES | LAG |" +
-      " CCRUZ OFICIAL | CCRUZ CALCULADA")
+      " FACP  OFICIAL | FACP CALCULADA")
 print("----------------------------------" +
       "----------------------------------")
 for ree in IDS_REES:

@@ -27,3 +27,6 @@
 #    python testes/teste33.py
 #
 # 6- Observar a saída exibida no terminal.
+
+# OBSERVAÇÃO - TEMPORARIAMENTE RESOLVIDO MANUALMENTE
+# TODO - IMPLEMENTAR NA INEWAVE A LEITURA O NEWDESP.REL

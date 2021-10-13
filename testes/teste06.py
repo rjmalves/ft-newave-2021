@@ -5,11 +5,12 @@
 #
 # Processar um caso com a funcionalidade PAR(p)-A habilitada,
 # executar o programa NWLISTCF e avaliar:
-# 1) impressão dos estados afluência passada e parcela anual (X)
-#    no arquivo estados.rel
-# 2) impressão do novo coeficiente (PIx) dos cortes no arquivo
-#    nwlistcf.rel
+# 1) impressão dos estados afluências passadas o arquivo estados.rel
+# 2) impressão dos coeficientes das afluências passadas nos cortes
+#    no arquivo nwlistcf.rel
 # 3) o cálculo do termo constante (RHS) de um corte qualquer
+# 4) impressão do identificador do corte em substituição ao nº do
+#    próximo corte na coluna IREG do arquivo nwlistcf.rel.
 
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
 #
@@ -30,3 +31,10 @@
 #    python testes/teste06.py
 #
 # 6- Observar a saída exibida no terminal.
+
+from inewave.nwlistcf import Nwlistcf, Estados
+
+# OBSERVAÇÃO: TESTE NÃO ESTÁ FUNCIONANDO NO MOMENTO
+# DEVIDO A MUDANÇA NO FORMATO DOS ARQUIVOS DO NWLISTCF.
+
+# TODO - ATUALIZAR NA INEWAVE A LEITURA DOS ARQUIVOS
