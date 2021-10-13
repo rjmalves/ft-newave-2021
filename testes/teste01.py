@@ -29,10 +29,10 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.pmo import LeituraPMO  # type: ignore
-from inewave.newave.parp import LeituraPARp  # type: ignore
-from inewave.nwlistop.mediassin import LeituraMediasSIN  # type: ignore
-from inewave.nwlistop.mediasmerc import LeituraMediasMerc  # type: ignore
+from inewave.newave.pmo import PMO
+from inewave.newave.parp import PARp
+from inewave.nwlistop.mediassin import MediasSIN
+from inewave.nwlistop.mediasmerc import MediasMerc
 
 
 # Variáveis auxiliares no processo
@@ -40,20 +40,22 @@ diretorio_v270000 = ""
 diretorio_v270403 = ""
 
 # Lê os arquivos de cada diretório
-pmo_v270000 = LeituraPMO(diretorio_v270000).le_arquivo()
-pmo_v270403 = LeituraPMO(diretorio_v270403).le_arquivo()
-parp_v270000 = LeituraPARp(diretorio_v270000).le_arquivo()
-parp_v270403 = LeituraPARp(diretorio_v270403).le_arquivo()
-mediassin_v270000 = LeituraMediasSIN(diretorio_v270000).le_arquivo()
-mediassin_v270403 = LeituraMediasSIN(diretorio_v270403).le_arquivo()
-mediasmerc_v270000 = LeituraMediasMerc(diretorio_v270000).le_arquivo()
-mediasmerc_v270403 = LeituraMediasMerc(diretorio_v270403).le_arquivo()
+pmo_v270000 = PMO.le_arquivo(diretorio_v270000)
+pmo_v270403 = PMO.le_arquivo(diretorio_v270403)
+parp_v270000 = PARp.le_arquivo(diretorio_v270000)
+parp_v270403 = PARp.le_arquivo(diretorio_v270403)
+mediassin_v270000 = MediasSIN.le_arquivo(diretorio_v270000)
+mediassin_v270403 = MediasSIN.le_arquivo(diretorio_v270403)
+mediasmerc_v270000 = MediasMerc.le_arquivo(diretorio_v270000)
+mediasmerc_v270403 = MediasMerc.le_arquivo(diretorio_v270403)
 
 # Compara os dados lidos
-pmo_iguais = pmo_v270000 == pmo_v270403
-parp_iguais = parp_v270000 == parp_v270403
-mediassin_iguais = mediassin_v270000 == mediassin_v270403
-mediasmerc_iguais = mediasmerc_v270000 == mediasmerc_v270403
+pmo_iguais = (pmo_v270000.custo_operacao_series_simuladas ==
+              pmo_v270403.custo_operacao_series_simuladas)
+parp_iguais = (parp_v270000.coeficientes_ree(1) ==
+               parp_v270403.coeficientes_ree(1))
+mediassin_iguais = mediassin_v270000.medias == mediassin_v270403.medias
+mediasmerc_iguais = mediasmerc_v270000.medias == mediasmerc_v270403.medias
 
 print(f"Arquivos pmo.dat iguais: {pmo_iguais}")
 print(f"Arquivos parp.dat iguais: {parp_iguais}")
