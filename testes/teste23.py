@@ -1,13 +1,12 @@
 # FORÇA-TAREFA DE VALIDAÇÃO DO MODELO NEWAVE V27.04.03
 # FEVEREIRO / 2021
 
-# TESTE 07
+# TESTE 23
 #
-# Processar um caso com a funcionalidade PAR(p)-A habilitada,
-# executar o programa NWLISTOP e avaliar a impressão da parcela
-# anual (X) utilizada no modelo PAR(p)-A.
-# •	simulação final sintética
-# •	simulação final histórica
+# Processar um caso com restrição elétrica e verificar a
+# consideração desta restrição no período pós quando se
+# considera a opção ir direto para simulação final.
+
 
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
 #
@@ -25,6 +24,6 @@
 #    python -m pip install -r requirements.txt
 #
 # 5- Executar no terminal o script desejado. Por ex:
-#    python testes/teste07.py
+#    python testes/teste25.py
 #
 # 6- Observar a saída exibida no terminal.

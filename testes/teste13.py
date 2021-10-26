@@ -3,9 +3,8 @@
 
 # TESTE 13
 #
-# Processar um caso com a funcionalidade PAR(p)-A habilitada e
-# verificar no arquivo PARP.DAT o cálculo das autocorrelações
-# parciais através do método de correlações condicionadas.
+# Processar um caso com a funcionalidade PAR(p)-A habilitada
+# e verificar a escolha da ordem do modelo.
 
 # INSTRUÇÕES PARA USO DO SCRIPT DE TESTE
 #
@@ -23,137 +22,92 @@
 #    python -m pip install -r requirements.txt
 #
 # 5- Executar no terminal o script desejado. Por ex:
-#    python testes/teste13.py
+#    python testes/teste15.py
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.pmo import LeituraPMO  # type: ignore
-from inewave.newave.parp import LeituraPARp  # type: ignore
+from inewave.newave.pmo import PMO  # type: ignore
+from inewave.newave.parp import PARp  # type: ignore
 from inewave.config import REES  # type: ignore
 from typing import Dict
 import numpy as np
-from parpa.yulewalker import YuleWalkerPARA  # type: ignore
+from parpa.yulewalker import YuleWalkerPARA
 
 
 # Variáveis auxiliares no processo
-diretorio_parpa = "C:\\Users\\roger\\OneDrive\\Documentos\\ONS\\teste_red_ordem\\nw27.4.7"
+diretorio_parpa = "/home/rogerio/ONS/testes_ft/parpa"
 
 # Lê o arquivo pmo.dat
-pmo = LeituraPMO(diretorio_parpa).le_arquivo()
+pmo = PMO.le_arquivo(diretorio_parpa)
 
 # Lê o arquivo parp.dat
-parp = LeituraPARp(diretorio_parpa).le_arquivo()
-
-# Realiza a verificação de igualdade para todas as
-# configurações de todas as REEs.
+parp = PARp.le_arquivo(diretorio_parpa)
 
 # Variáveis auxiliares para armazenar valores
 IDS_REES = range(1, len(REES) + 1)
-# Máxima diferença absoluta por REE
-max_dif_ree: Dict[int, float] = {ree: -1e4
+# Número de ordens diferentes por REE
+n_dif_ree: Dict[int, float] = {ree: 0
+                               for ree in IDS_REES}
+ano_n_dif_ree: Dict[int, int] = {ree: 0
                                  for ree in IDS_REES}
-ano_max_dif_ree: Dict[int, int] = {ree: 0
-                                   for ree in IDS_REES}
-periodo_max_dif_ree: Dict[int, int] = {ree: 0
-                                       for ree in IDS_REES}
-ordem_max_dif_ree: Dict[int, int] = {ree: 0
+periodo_n_dif_ree: Dict[int, int] = {ree: 0
                                      for ree in IDS_REES}
-coef_o_max_dif_ree: Dict[int, float] = {ree: 0
-                                        for ree in IDS_REES}
-coef_e_max_dif_ree: Dict[int, float] = {ree: 0
-                                        for ree in IDS_REES}
-# Máxima diferença percentual por REE
-max_dif_percent_ree: Dict[int, float] = {ree: -1e4
-                                         for ree in IDS_REES}
-ano_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                        for ree in IDS_REES}
-periodo_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                            for ree in IDS_REES}
-ordem_max_dif_perc_ree: Dict[int, int] = {ree: 0
-                                          for ree in IDS_REES}
-coef_o_max_dif_perc_ree: Dict[int, float] = {ree: 0
-                                             for ree in IDS_REES}
-coef_e_max_dif_perc_ree: Dict[int, float] = {ree: 0
-                                             for ree in IDS_REES}
+max_sig_n_dif_ree: Dict[int, int] = {ree: 0
+                                     for ree in IDS_REES}
+ordem_n_dif_ree: Dict[int, int] = {ree: 0
+                                   for ree in IDS_REES}
+signi_n_dif_ree: Dict[int, int] = {ree: 0
+                                   for ree in IDS_REES}
 
+# Lê a FACP do parp.dat e compara com o intervalo de confiança
+interv_conf = 1.96/np.sqrt(2021 - 1931 + 1)
 
-# Calcula as autocorrelações parciais e compara com o arquivo
-# Calcula a FACP para o período
 for ree in IDS_REES:
-    print(f"Calculando FACP para REE {ree} - {REES[ree - 1]}")
-    series_energia = parp.series_energia_ree(ree)
+    print("Escolhendo ordens dos modelos para REE" +
+          f" {ree} - {REES[ree - 1]}")
+    series_energia = {c + 1: parp.series_energia_ree(ree, c)
+                      for c in range(60)}
     yw = YuleWalkerPARA(series_energia)
-    serie_facp = parp.correlograma_energia_ree(ree)
-    mes = 1
+    mes = 0
     for a, ano in enumerate(parp.anos_estudo):
-        ordens_finais = parp.ordens_finais_ree(ree)[ano]
+        ordens_orig = parp.ordens_originais_ree(ree)[a, :]
         # Gera a tabela das configurações do ano anterior e do atual
         cfgs = pmo.configuracoes_entrada_reservatorio
         if a == 0:
-            c_atual = cfgs.configs_por_ano[ano]
+            c_atual = cfgs[a, 1:]
             c_ant = list(np.ones_like(c_atual, dtype=np.int64))
             configs = np.array([c_ant, c_atual])
         else:
-            a_ant = parp.anos_estudo[a - 1]
-            c_ant = cfgs.configs_por_ano[a_ant]
-            c_atual = cfgs.configs_por_ano[ano]
+            c_ant = cfgs[a - 1, 1:]
+            c_atual = cfgs[a, 1:]
             configs = np.array([c_ant, c_atual])
         for p in range(0, 12):
-            facp = yw.facp(p, 12, configs)
             # Atualiza as variáveis com as máximas diferenças
-            for i, c in enumerate(facp):
-                oficial = serie_facp[mes][i]
-                dif = abs(c - oficial)
-                dif_percentual = 100 * abs(c - oficial) / oficial
-                if dif > max_dif_ree[ree]:
-                    max_dif_ree[ree] = dif
-                    max_dif_percent_ree[ree] = dif_percentual
-                    ano_max_dif_ree[ree] = ano
-                    periodo_max_dif_ree[ree] = mes
-                    ordem_max_dif_ree[ree] = i + 1
-                    coef_e_max_dif_ree[ree] = c
-                    coef_o_max_dif_ree[ree] = oficial
-                if dif_percentual > max_dif_percent_ree[ree]:
-                    max_dif_percent_ree[ree] = dif_percentual
-                    ano_max_dif_perc_ree[ree] = ano
-                    periodo_max_dif_perc_ree[ree] = mes
-                    ordem_max_dif_perc_ree[ree] = i + 1
-                    coef_e_max_dif_perc_ree[ree] = c
-                    coef_o_max_dif_perc_ree[ree] = oficial
-            mes += 1
+            ordem = yw.escolhe_ordem_modelo(p, 6, configs)
+            dif = abs(ordem - ordens_orig[p])
+            if dif > n_dif_ree[ree]:
+                n_dif_ree[ree] = dif
+                ano_n_dif_ree[ree] = ano
+                periodo_n_dif_ree[ree] = p + 1
+                ordem_n_dif_ree[ree] = ordens_orig[p]
+                signi_n_dif_ree[ree] = ordem
+                mes += 1
 
 print("")
-print(" REE | MAX. DIF. ABS. | MES | LAG |" +
-      " FACP  OFICIAL | FACP CALCULADA")
+print(" REE | MAX. DIF. |  ANO | MES |" +
+      " ORDEM ESCOLHIDA | MAX. SIGNIFIC.")
 print("--------------------------------" +
-      "-----------------------------------")
+      "---------------------------------")
 for ree in IDS_REES:
     str_ree = f"{ree}".rjust(2)
-    str_max_dif = "{:1.9f}".format(max_dif_ree[ree]).rjust(10)
-    str_mes = f"{periodo_max_dif_ree[ree]}".rjust(2)
-    str_lag = f"{ordem_max_dif_ree[ree]}".rjust(2)
-    str_coef_o = "{:1.6f}".format(coef_o_max_dif_ree[ree]).rjust(12)
-    str_coef_e = "{:1.6f}".format(coef_e_max_dif_ree[ree]).rjust(12)
-    str_linha = f"  {str_ree} |    {str_max_dif} |  {str_mes} | "
-    str_linha += f" {str_lag} |  {str_coef_o} |   {str_coef_e}"
+    str_n_dif = "{}".format(n_dif_ree[ree]).rjust(8)
+    str_ano = "{}".format(ano_n_dif_ree[ree]).rjust(4)
+    str_mes = f"{periodo_n_dif_ree[ree]}".rjust(2)
+    str_ordem = f"{ordem_n_dif_ree[ree]}".rjust(15)
+    str_signi = "{}".format(signi_n_dif_ree[ree]).rjust(14)
+    str_linha = f"  {str_ree} |  {str_n_dif} | {str_ano} | "
+    str_linha += f" {str_mes} | {str_ordem} | {str_signi}"
     print(str_linha)
 print("---------------------------------" +
-      "----------------------------------")
+      "--------------------------------")
 print("")
-
-print(" REE | MAX. DIF. PERC. | MES | LAG |" +
-      " FACP  OFICIAL | FACP CALCULADA")
-print("----------------------------------" +
-      "----------------------------------")
-for ree in IDS_REES:
-    str_ree = f"{ree}".rjust(2)
-    str_max_dif = "{:2.6f}".format(max_dif_percent_ree[ree]).rjust(10)
-    str_mes = f"{periodo_max_dif_perc_ree[ree]}".rjust(2)
-    str_lag = f"{ordem_max_dif_ree[ree]}".rjust(2)
-    str_coef_o = "{:1.6f}".format(coef_o_max_dif_perc_ree[ree]).rjust(12)
-    str_coef_e = "{:1.6f}".format(coef_e_max_dif_perc_ree[ree]).rjust(12)
-    str_linha = f"  {str_ree} |      {str_max_dif} |  {str_mes} | "
-    str_linha += f" {str_lag} |  {str_coef_o} |   {str_coef_e}"
-    print(str_linha)
-print("----------------------------------" +
-      "----------------------------------")

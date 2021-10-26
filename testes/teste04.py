@@ -28,18 +28,24 @@
 #
 # 6- Observar a saída exibida no terminal.
 
-from inewave.newave.dger import LeituraDGer  # type: ignore
-from inewave.newave.pmo import LeituraPMO  # type: ignore
+from inewave.newave.dger import DGer  # type: ignore
+from inewave.newave.pmo import PMO  # type: ignore
 
+
+# OBSERVAÇÃO -
+# ESTE TESTE NÃO VAI FUNCIONAR POIS ALGUNS RECURSOS DA
+# INEWAVE FORAM TEMPORARIAMENTE DESABILITADOS.
+
+# TODO - RESTAURAR TESTE
 
 # Variáveis auxiliares no processo
 diretorio_oficial = ""
 diretorio_parpa = ""
 # Lê os arquivos
-dger_oficial = LeituraDGer(diretorio_oficial).le_arquivo()
-pmo_oficial = LeituraPMO(diretorio_oficial).le_arquivo()
-dger_parpa = LeituraDGer(diretorio_parpa).le_arquivo()
-pmo_parpa = LeituraPMO(diretorio_parpa).le_arquivo()
+dger_oficial = DGer.le_arquivo(diretorio_oficial)
+pmo_oficial = PMO.le_arquivo(diretorio_oficial)
+dger_parpa = DGer.le_arquivo(diretorio_parpa)
+pmo_parpa = PMO.le_arquivo(diretorio_parpa)
 
 # Compara os dados lidos
 eco_igual_oficial = dger_oficial.eq_eco_saida(pmo_oficial.dados_gerais)

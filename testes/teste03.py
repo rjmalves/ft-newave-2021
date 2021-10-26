@@ -28,14 +28,14 @@
 # 6- Observar a saída exibida no terminal e a figura
 #    gerada na pasta saidas/.
 
-from inewave.newave.pmo import LeituraPMO  # type: ignore
-from inewave.newave.parp import LeituraPARp  # type: ignore
-from inewave.nwlistop.mediassin import LeituraMediasSIN  # type: ignore
-from inewave.nwlistop.mediasmerc import LeituraMediasMerc  # type: ignore
+from inewave.newave.pmo import PMO  # type: ignore
+from inewave.newave.parp import PARp  # type: ignore
+from inewave.nwlistop.mediassin import MediasSIN  # type: ignore
+from inewave.nwlistop.mediasmerc import MediasMerc  # type: ignore
 import os
 import numpy as np
 import matplotlib.pyplot as plt  # type: ignore
-
+from itertools import combinations
 
 # Variáveis auxiliares no processo
 # Consideradas três execuções do NEWAVE, por exemplo:
@@ -47,61 +47,38 @@ diretorio_execB = ""
 diretorio_execC = ""
 
 # Lê os arquivos de cada diretório
-pmo_execA = LeituraPMO(diretorio_execA).le_arquivo()
-pmo_execB = LeituraPMO(diretorio_execB).le_arquivo()
-pmo_execC = LeituraPMO(diretorio_execC).le_arquivo()
-parp_execA = LeituraPARp(diretorio_execA).le_arquivo()
-parp_execB = LeituraPARp(diretorio_execB).le_arquivo()
-parp_execC = LeituraPARp(diretorio_execC).le_arquivo()
-mediassin_execA = LeituraMediasSIN(diretorio_execA).le_arquivo()
-mediassin_execB = LeituraMediasSIN(diretorio_execB).le_arquivo()
-mediassin_execC = LeituraMediasSIN(diretorio_execC).le_arquivo()
-mediasmerc_execA = LeituraMediasMerc(diretorio_execA).le_arquivo()
-mediasmerc_execB = LeituraMediasMerc(diretorio_execB).le_arquivo()
-mediasmerc_execC = LeituraMediasMerc(diretorio_execC).le_arquivo()
+pmo_execA = PMO.le_arquivo(diretorio_execA)
+pmo_execB = PMO.le_arquivo(diretorio_execB)
+pmo_execC = PMO.le_arquivo(diretorio_execC)
+parp_execA = PARp.le_arquivo(diretorio_execA)
+parp_execB = PARp.le_arquivo(diretorio_execB)
+parp_execC = PARp.le_arquivo(diretorio_execC)
+mediassin_execA = MediasSIN.le_arquivo(diretorio_execA)
+mediassin_execB = MediasSIN.le_arquivo(diretorio_execB)
+mediassin_execC = MediasSIN.le_arquivo(diretorio_execC)
+mediasmerc_execA = MediasMerc.le_arquivo(diretorio_execA)
+mediasmerc_execB = MediasMerc.le_arquivo(diretorio_execB)
+mediasmerc_execC = MediasMerc.le_arquivo(diretorio_execC)
 
 # Compara os dados lidos
-pmo_iguais = pmo_execA == pmo_execB == pmo_execC
-parp_iguais = parp_execA == parp_execB == parp_execC
-mediassin_iguais = mediassin_execA == mediassin_execB == mediassin_execC
-mediasmerc_iguais = mediasmerc_execA == mediasmerc_execB == mediasmerc_execC
+pmo_iguais = all([d1 == d2 for d1, d2 in
+                  combinations([pmo_execA.custo_operacao_series_simuladas,
+                                pmo_execB.custo_operacao_series_simuladas,
+                                pmo_execC.custo_operacao_series_simuladas], 2)])
+parp_iguais = all([d1 == d2 for d1, d2 in
+                   combinations([parp_execA.coeficientes_ree(1),
+                                 parp_execB.coeficientes_ree(1),
+                                 parp_execC.coeficientes_ree(1)], 2)])
+mediassin_iguais = all([d1 == d2 for d1, d2 in
+                       combinations([mediassin_execA.medias,
+                                     mediassin_execB.medias,
+                                     mediassin_execC.medias], 2)])
+mediasmerc_iguais = all([d1 == d2 for d1, d2 in
+                         combinations([mediasmerc_execA.medias,
+                                       mediasmerc_execB.medias,
+                                       mediasmerc_execC.medias], 2)])
 
 print(f"Arquivos pmo.dat iguais: {pmo_iguais}")
 print(f"Arquivos parp.dat iguais: {parp_iguais}")
 print(f"Arquivos MEDIAS-SIN.CSV iguais: {mediassin_iguais}")
 print(f"Arquivos MEDIAS-MERC.CSV iguais: {mediasmerc_iguais}")
-
-
-# Analisa os tempos de execução
-tempos_A = pmo_execA.convergencia.tempos_execucao
-tempos_B = pmo_execB.convergencia.tempos_execucao
-tempos_C = pmo_execC.convergencia.tempos_execucao
-max_tempo = max(tempos_A + tempos_B + tempos_C)
-
-iters_A = list(range(1, len(tempos_A) + 1))
-iters_B = list(range(1, len(tempos_B) + 1))
-iters_C = list(range(1, len(tempos_C) + 1))
-max_iter = max(iters_A + iters_B + iters_C)
-
-# Gera o gráfico
-largura = 0.5
-plt.figure(figsize=(10, 5))
-plt.bar(np.array(iters_A)[::3],
-        tempos_A[::3], largura, label="Execução A")
-plt.bar(np.array(iters_B)[::3] + 0.5,
-        tempos_B[::3], largura, label="Execução B")
-plt.bar(np.array(iters_C)[::3] + 1.0,
-        tempos_C[::3], largura, label="Execução C")
-plt.legend()
-plt.title("Tempos de Execução das Iterações (Teste 03 - FT NEWAVE 2021)")
-plt.xlabel("Iteração")
-plt.ylabel("Tempo (s)")
-plt.xlim(0, max_iter)
-plt.ylim(0, max_tempo)
-plt.tight_layout()
-
-# Exporta a figura, criando a pasta se necessário
-if not os.path.exists("saidas/"):
-    os.makedirs("saidas/")
-plt.savefig("saidas/teste03_tempos.png")
-plt.close()
